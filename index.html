@@ -21,14 +21,13 @@
     </header>
 
     <div class="intro">
-      <div><div class="eyebrow">PARTY BUILDER <span>v0.3.0</span></div><h1>내 캐릭터로 파티를 조합하세요</h1><p>보스 배율은 각 캐릭터에 한 번 입력하고, 파티 조합은 자유롭게 바꿔보세요.</p></div>
-      <div class="small-note"><span class="dot-blue"></span> 환산주스탯 API 사용 안 함 <span class="separate">·</span> 넥슨 API 선택 연결</div>
+      <div><div class="eyebrow">PARTY BUILDER <span>v0.4.0</span></div><h1>우리 파티, 한눈에 관리해요</h1><p>캐릭터를 선택해 보스 배율을 기록하고, 파티 조합을 비교해 보세요.</p></div>
     </div>
 
-    <main class="main-grid">
+    <main class="main-grid no-party" id="mainGrid">
       <section class="panel library-panel" aria-labelledby="rosterTitle">
         <div class="panel-heading">
-          <div class="section-heading"><span class="section-n">01</span><h2 id="rosterTitle">캐릭터 보관함</h2><span class="count-tag" id="characterCount">0명</span></div>
+          <div class="section-heading"><span class="section-n">01</span><h2 id="rosterTitle">캐릭터 검색</h2><span class="count-tag" id="characterCount">0명</span></div>
           <button type="button" class="text-button" id="addOwnerBtn">＋ 사용자 추가</button>
         </div>
         <div class="add-bar">
@@ -43,7 +42,7 @@
         <div id="roster" class="roster"></div>
       </section>
 
-      <aside class="right-column">
+      <aside class="right-column" id="partyWorkspace" hidden>
         <section class="panel party-panel" aria-labelledby="partyTitle">
           <div class="panel-heading"><div class="section-heading"><span class="section-n">02</span><h2 id="partyTitle">파티 편성</h2></div><button class="text-button" id="addPartyBtn">＋ 파티 추가</button></div>
           <div class="party-toolbar">
@@ -52,29 +51,34 @@
           </div>
           <div class="party-actions"><button id="renamePartyBtn" class="inline-action">이름 변경</button><button id="clearPartyBtn" class="inline-action">파티 비우기</button><button id="deletePartyBtn" class="inline-action danger-text">파티 삭제</button></div>
           <div id="partySlots" class="party-slots"></div>
-          <div class="helper">왼쪽 캐릭터를 슬롯에 끌어놓거나 <b>파티 추가</b> 버튼을 누르세요. 같은 사용자의 캐릭터는 한 파티에 하나만 등록할 수 있어요.</div>
+          <div class="helper">캐릭터를 끌어 놓거나 카드의 <b>+ 파티</b> 버튼으로 추가하세요. 같은 사용자는 한 캐릭터만 참여할 수 있어요.</div>
         </section>
         <section class="panel estimate-panel" aria-labelledby="estimateTitle">
           <div class="panel-heading"><div class="section-heading"><span class="section-n">03</span><h2 id="estimateTitle">보스 배율 비교</h2></div></div>
-          <label class="stacked-label boss-selector-label">비교할 보스 / 난이도<select id="bossSelect"></select></label>
-          <div class="mini-stats">
-            <div><span>파티원 입력 현황</span><strong id="ratioCoverage">0 / 0</strong></div>
-            <div><span>개인 배율 단순 합계</span><strong id="ratioTotal">—</strong></div>
+          <div class="boss-board-controls"><div class="tabs" id="comparePeriodTabs"><button type="button" class="tab active" data-action="compare-period" data-period="주간">주간</button><button type="button" class="tab" data-action="compare-period" data-period="월간">월간</button></div><input id="compareBossFilter" class="boss-filter" type="search" placeholder="보스 검색" aria-label="비교할 보스 찾기"></div>
+          <div id="bossTiles" class="boss-tiles"></div>
+          <div id="bossComparison" hidden>
+            <div class="compare-head"><div id="selectedBossVisual"></div><button class="icon-button" type="button" data-action="close-compare" aria-label="보스 결과 닫기">✕</button></div>
+            <div id="difficultyChips" class="difficulty-chips"></div>
+            <div class="mini-stats"><div><span>배율 입력 현황</span><strong id="ratioCoverage">0 / 0</strong></div><div><span>개인 배율 참고 합계</span><strong id="ratioTotal">—</strong></div></div>
+            <div id="memberRatios" class="member-ratios"></div>
+            <div class="divider"></div>
+            <div class="time-heading"><strong>예상 클리어 시간</strong><span>20분 기준</span></div>
+            <div id="timeRows" class="time-rows"></div>
+            <p class="warning-note">개인 배율의 단순 합계에 따른 참고 시간입니다. 실제 파티 배율이나 클리어 시간을 보장하지 않으며 직업 시너지·보스 패턴은 반영되지 않습니다.</p>
           </div>
-          <div id="memberRatios" class="member-ratios"></div>
-          <div class="divider"></div>
-          <div class="time-heading"><strong>참고 예상 시간</strong><span>모든 파티원 배율 입력 시 표시</span></div>
-          <div id="timeRows" class="time-rows"></div>
-          <p class="warning-note">⚠ <b>참고용 계산입니다.</b> 개인 배율 합계는 실제 환산주스탯 파티 배율이 아닙니다. 직업 시너지·극딜 주기·보스 패턴이 반영되지 않습니다.</p>
+          <div id="bossChooseHint" class="boss-choose-hint">보스 카드를 누르면 파티 배율과 예상 시간이 펼쳐져요.</div>
+          <select id="bossSelect" hidden aria-label="선택된 보스 난이도"></select>
         </section>
       </aside>
     </main>
-    <section class="panel overview-panel" aria-labelledby="overviewTitle"><div class="panel-heading"><div class="section-heading"><span class="section-n">04</span><h2 id="overviewTitle">파티 조합 비교</h2></div><span class="muted">현재 선택한 보스 기준 · 단순 합계</span></div><div id="overviewTable"></div></section>
+    <section class="panel overview-panel" id="partyOverview" aria-labelledby="overviewTitle" hidden><div class="panel-heading"><div class="section-heading"><span class="section-n">04</span><h2 id="overviewTitle">파티 조합 비교</h2></div><span class="muted">선택한 보스 기준</span></div><div id="overviewTable"></div></section>
     <footer>메이플스토리 캐릭터 정보: NEXON Open API(선택 연동) · 개인 배율은 사용자가 직접 기록 · 저장 위치: 이 브라우저의 localStorage</footer>
   </div>
   <div class="toast" id="toast" role="status" aria-live="polite"></div>
 
   <dialog id="settingsDialog" class="modal"><form method="dialog" id="settingsForm"><div class="dialog-top"><h2>넥슨 API 프록시 설정</h2><button type="button" class="icon-button" data-close="settingsDialog" aria-label="닫기">✕</button></div><p class="muted">프록시 주소만 이 브라우저에 저장합니다. <b>넥슨 API 키는 입력하지 마세요.</b> Cloudflare Worker의 Secret으로 설정해야 합니다.</p><label class="stacked-label">프록시 기본 주소<input id="proxyUrl" type="url" placeholder="https://my-maple-proxy.example.workers.dev" autocomplete="url"></label><p class="muted">주소를 비워두면 수동 등록 모드로 사용합니다. HTTPS URL만 허용합니다.</p><div class="modal-footer"><button type="button" class="btn btn-quiet" data-close="settingsDialog">취소</button><button class="btn btn-primary" value="save" id="saveSettingsBtn">저장</button></div></form></dialog>
-  <dialog id="editDialog" class="modal"><form id="editForm"><div class="dialog-top"><h2>캐릭터 정보 수정</h2><button type="button" class="icon-button" data-close="editDialog" aria-label="닫기">✕</button></div><input type="hidden" id="editId"><div class="form-grid"><label class="stacked-label">캐릭터명<input id="editName" required maxlength="30"></label><label class="stacked-label">본캐/부캐<select id="editKind"><option value="main">본캐</option><option value="alt">부캐</option></select></label><label class="stacked-label">직업<input id="editJob" maxlength="40"></label><label class="stacked-label">레벨<input id="editLevel" type="number" min="0" max="1000"></label><label class="stacked-label">전투력<input id="editPower" type="number" min="0" step="1" placeholder="예: 25000000"></label><label class="stacked-label">월드<input id="editWorld" maxlength="40"></label><label class="stacked-label full">캐릭터 이미지 HTTPS URL<input id="editImage" type="url" placeholder="https://..."></label></div><div class="modal-footer"><button type="button" class="btn btn-quiet" data-close="editDialog">취소</button><button class="btn btn-primary" type="submit">저장</button></div></form></dialog>
+  <dialog id="editDialog" class="modal"><form id="editForm"><div class="dialog-top"><h2>캐릭터 정보 수정</h2><button type="button" class="icon-button" data-close="editDialog" aria-label="닫기">✕</button></div><input type="hidden" id="editId"><div class="form-grid"><label class="stacked-label">캐릭터명<input id="editName" required maxlength="30"></label><label class="stacked-label">본캐/부캐<select id="editKind"><option value="main">본캐</option><option value="alt">부캐</option></select></label><label class="stacked-label">직업<input id="editJob" maxlength="40"></label><label class="stacked-label">레벨<input id="editLevel" type="number" min="0" max="1000"></label><label class="stacked-label">전투력<input id="editPower" type="number" min="0" step="1" placeholder="예: 25000000"></label><label class="stacked-label">월드<input id="editWorld" maxlength="40"></label><label class="stacked-label">아케인포스<input id="editArcane" type="number" min="0" step="1" placeholder="미조회 시 공란"></label><label class="stacked-label">어센틱포스<input id="editAuthentic" type="number" min="0" step="1" placeholder="미조회 시 공란"></label><label class="stacked-label full">캐릭터 이미지 HTTPS URL<input id="editImage" type="url" placeholder="https://..."></label></div><div class="modal-footer"><button type="button" class="btn btn-quiet" data-close="editDialog">취소</button><button class="btn btn-primary" type="submit">저장</button></div></form></dialog>
+  <dialog id="ratioDialog" class="modal ratio-dialog" aria-labelledby="ratioDialogTitle"><div class="dialog-top"><div><div class="eyebrow">CHARACTER &amp; BOSS</div><h2 id="ratioDialogTitle">보스 배율 관리</h2></div><button type="button" class="icon-button dialog-close" data-close="ratioDialog" aria-label="닫기">✕</button></div><div id="ratioCharacterInfo" class="ratio-character-info"></div><div id="ratioDialogBody" class="ratio-dialog-body"></div><div class="modal-footer"><button type="button" class="btn btn-primary" data-close="ratioDialog">완료</button></div></dialog>
 </body>
 </html>

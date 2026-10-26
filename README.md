@@ -1,62 +1,33 @@
-# 메이플 파티 플래너 v0.3.0
+# 메이플 파티 플래너 v0.4.0
 
-GitHub Pages에 바로 올릴 수 있는 **순수 HTML/CSS/JavaScript** 웹앱입니다. 별도 빌드나 외부 라이브러리가 필요 없습니다.
+GitHub Pages에 올려 사용할 수 있는 HTML / CSS / JS 웹앱입니다. 설치·빌드 불필요.
 
-## 핵심 기능
+## 배포
 
-- 사용자 보관함: 기본 **'나' 한 명**, 필요할 때 사용자 추가, 이름 변경, 삭제
-- 캐릭터 등록: API 없이 직접 등록 / 선택적 넥슨 Open API 조회 후 저장
-- 캐릭터 정보: 캐릭터명, 이미지, 직업, 월드, 레벨, 전투력, 본캐·부캐
-- 각 캐릭터를 펼쳐 **주간/월간 보스별 난이도마다 퍼센트** 입력, 자동 저장
-- 파티 1~6명 설정, 캐릭터를 슬롯에 드래그 앤 드롭 / `+ 파티 추가` 버튼 사용
-- 다중 파티 생성, 파티별 편성 기록, 같은 사용자 캐릭터의 중복 편성 방지
-- 지정한 보스 기준 캐릭터별 배율, 입력 여부, 단순 합산 배율 및 참고 시간 표시
-- 100% 최소컷 / 110% 기본 / 130% 메청년 / 150% 메린이 / 200% 메애기 각 20분 기준
-- localStorage 자동 저장 / JSON 내보내기·불러오기
+GitHub 저장소의 루트에 `index.html`, `style.css`, `app.js`, `assets/` 폴더를 업로드하세요. `Settings → Pages → Deploy from a branch → main / (root)`에서 공개할 수 있습니다.
 
-**주의: 환산주스탯 API는 호출하지 않습니다.** 파티 합계는 각 캐릭터가 입력한 개인 보스 배율의 단순 합계입니다. 실제 파티 배율과 다를 수 있으므로 '참고 합계'로만 취급합니다. 시간도 이 합계에 기반한 단순 추정치입니다. 배율이 한 명이라도 없으면 시간 예측을 표시하지 않습니다.
+### Nexon API 연결
 
-## GitHub Pages 배포
+`worker/nexon-proxy.js`를 Cloudflare Worker로 배포하고 **Secret `NEXON_API_KEY`** 및 **Text `ALLOWED_ORIGIN`**(GitHub Pages의 `location.origin`)을 등록하세요. 웹사이트의 `API 설정`에서 새 Worker 기본 URL을 넣으면 조회됩니다. 외부에 API 키를 공개하거나 GitHub에 올리지 마세요.
 
-1. GitHub에 새 저장소를 만듭니다.
-2. `index.html`, `style.css`, `app.js`, `README.md`를 **레포지토리 루트**에 업로드합니다. (`worker/` 폴더는 나중에 API 연동을 위해 보관 가능.)
-3. 저장소 **Settings → Pages → Source: Deploy from a branch → Branch: main / (root)**를 선택해 저장합니다.
-4. `https://사용자명.github.io/저장소명/`으로 접속해 사용합니다.
-5. 저장 데이터는 브라우저와 웹사이트 출처별로 별개입니다. 서로 다른 PC에서는 JSON 백업·복원으로 옮기세요. 브라우저 기록/사이트 데이터 삭제 시 localStorage가 없어질 수 있으므로 주기적 백업을 권장합니다.
+Worker 코드를 **다시 배포해야** 아케인포스·어센틱포스를 자동으로 받을 수 있습니다. 기존 캐릭터는 자동 갱신되지 않으므로 새로 조회하거나 캐릭터 편집창에서 수동 입력해야 합니다.
 
-프록시를 사용하지 않아도 캐릭터 수동 추가, 배율 입력, 파티 구성은 모두 작동합니다.
+### 보스 이미지 (100% 로컬)
 
-## 넥슨 Open API 연결(선택)
+`assets/bosses/*.svg`가 사용되며, 사용자 브라우저에서 타사 이미지 서버를 호출하지 않습니다. 현재 수록된 SVG는 프로젝트용 **자체 제작 대체 아이콘**으로, 넥슨 공식 보스 일러스트가 아닙니다. 실제 게임 이미지는 자동 다운로드 가능한 출처 및 재배포 권한을 확인하지 못하여 동봉하지 않았습니다.
 
-1. [NEXON Open API](https://openapi.nexon.com/)에서 사용할 키를 발급받습니다.
-2. Cloudflare 대시보드에서 **Workers & Pages → Create → Worker**를 만들고 `worker/nexon-proxy.js` 내용을 배포합니다.
-3. Worker **Settings → Variables and Secrets**에서 다음 두 값을 입력합니다.
-   - `NEXON_API_KEY`: **Secret**으로 저장. GitHub 파일이나 브라우저에 절대 넣지 마세요.
-   - `ALLOWED_ORIGIN`: GitHub Pages의 **출처(Origin)**. 예를 들어 GitHub Pages 주소가 `https://myname.github.io/maple-party/`라면 **`https://myname.github.io`** 입니다. `/maple-party/` 경로는 포함하지 않습니다.
-4. 배포 후 Worker URL `https://...workers.dev`를 복사합니다.
-5. 사이트 상단 **API 설정**에서 Worker URL을 넣고 저장합니다.
-6. 닉네임 입력 → **넥슨 조회** → 미리보기 → **보관함에 저장** 순서로 사용합니다.
+실제 이미지로 교체하려면 적법하게 확보한 이미지를 `assets/bosses/`에 넣고 `app.js`의 `bossCover()` 경로 확장자 `.svg`를 `.png` 또는 `.webp`로 수정하면 됩니다. 기존 SVG와 같은 slug를 유지하세요. 일부만 교체하려면 `bossCover()`에서 개별 파일 이름을 분기해 주세요.
 
-Worker는 `/character?name=...`에서 넥슨 API의 `id`, `character/basic`, `character/stat`을 조회해 필요한 필드만 반환합니다. 전투력은 `final_stat` 중 `전투력` 필드를 이용합니다. 일부 캐릭터의 스탯을 조회할 수 없으면 전투력이 미조회로 표시될 수 있습니다.
+### 데이터 유지
 
-**보안:** `ALLOWED_ORIGIN`은 브라우저 접근을 제어하는 CORS 값일 뿐, 인증이 아닙니다. 공개 Worker URL을 알고 Origin 헤더를 위조하는 요청 등을 완벽히 차단하지는 못합니다. 실제 대중 서비스라면 Cloudflare WAF/Rate Limiting, 별도 인증, 요청 수 제한 등을 추가하세요. 개인 사용 목적에 맞춘 최소 구현입니다.
+기존 저장 키 `maple_party_planner_web_v03`을 계속 사용합니다. 같은 `*.github.io` 도메인 내 저장소 경로만 변경하면 localStorage 저장 출처는 동일합니다. 사용자명이나 커스텀 도메인이 변경되면 출처가 달라지므로 **기존 URL에서 JSON 백업 → 새 URL에서 복원**하세요.
 
-## 저장 자료 형식
+개인 배율 합계 및 예상 시간은 단순 참고 계산이며 환산주스탯 공식 파티 배율 계산값이 아닙니다.
 
-`maple_party_planner_web_v03` 키로 사용자·캐릭터·배율·파티·설정이 저장됩니다. 캐릭터 배율은 `주간|벨로나|노멀` 같은 고정 키에 저장됩니다. v0.2 저장 자료가 있으면 **캐릭터/파티 편성만 자동 이전**합니다. 이전 버전의 **파티 단위 배율**은 캐릭터 개인 배율로 임의 전환하지 않으며 이전 localStorage 키도 삭제하지 않습니다.
+## 폴더
 
-## 이번 버전에서 제외한 기능
-
-- 환산주스탯 외부 API/스크래핑
-- 파티 직업 시너지나 실전 딜량을 반영한 공식 배율 계산
-- 자동 다중 기기 동기화
-- 게임 내 파티 구성·보스 클리어 기록 자동 동기화
-
-## 참고
-
-- [NEXON Open API](https://openapi.nexon.com/ko/game/maplestory/)
-- [메이플스토리 보스 공식 가이드](https://maplestory.nexon.com/Guide/N23GameInformation/Articles/458)
-- [Cloudflare Workers 설명서](https://developers.cloudflare.com/workers/)
-- [GitHub Pages 설정](https://docs.github.com/en/pages/getting-started-with-github-pages/configuring-a-publishing-source-for-your-github-pages-site)
-
-보스/난이도 목록은 `app.js` 상단 `BOSS_GROUPS`에서 수정할 수 있습니다. 게임 업데이트에 따라 변경될 수 있는 정적 목록입니다.
+- `index.html`: 레이아웃, 모달
+- `style.css`: Toss 스타일에서 영감을 얻은 자체 UI 스타일
+- `app.js`: 등록, 파티, 계산, 저장
+- `assets/bosses/`: 빌드 의존 없는 로컬 이미지
+- `worker/nexon-proxy.js`: 선택적인 넥슨 API 중계 Worker

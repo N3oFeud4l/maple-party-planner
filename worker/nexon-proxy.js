@@ -59,14 +59,24 @@ export default {
       const basic = basicResult.value;
       const stat = statResult.status === 'fulfilled' ? statResult.value : {};
       const list = Array.isArray(stat.final_stat) ? stat.final_stat : [];
-      const combatPower = list.find(s => s.stat_name === '전투력')?.stat_value;
+      const findStat = (...names) => {
+        const raw = list.find(s => names.includes(String(s.stat_name).replace(/\s/g,'')))?.stat_value;
+        if (raw === undefined || raw === null || raw === '') return null;
+        const n = Number(String(raw).replaceAll(',', ''));
+        return Number.isFinite(n) ? n : null;
+      };
+      const combatPower = findStat('전투력');
+      const arcaneForce = findStat('아케인포스', 'ARCANEFORCE');
+      const authenticForce = findStat('어센틱포스', 'AUTENTICFORCE', 'AUTHENTICFORCE');
       return json({
         name: basic.character_name || name,
         image: basic.character_image || '',
         job: basic.character_class || '',
         world: basic.world_name || '',
         level: Number(basic.character_level) || 0,
-        combatPower: Number(String(combatPower ?? '0').replaceAll(',', '')) || 0,
+        combatPower: combatPower ?? 0,
+        arcaneForce,
+        authenticForce,
         fetchedAt: basic.date || new Date().toISOString(),
       });
     } catch (error) {
