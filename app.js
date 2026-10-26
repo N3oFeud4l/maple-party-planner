@@ -2,6 +2,8 @@
   'use strict';
 
   const STORE = 'maple_party_planner_web_v03';
+  // 서버 주소만 공개해도 됩니다. 실제 넥슨 API 키는 Worker Secret에 보관합니다.
+  const WORKER_URL = 'https://maple-nexon-api.maple-party-planner.workers.dev';
   const OLD_STORE = 'maple_party_planner_web_v02';
   const LEVELS = [{ n: 100, label: '최소컷' }, { n: 110, label: '기본 배율' }, { n: 130, label: '메청년 비율' }, { n: 150, label: '메린이 비율' }, { n: 200, label: '메애기 비율' }];
   // 보스/난이도 목록은 코드에 정적으로 두며 필요시 유지보수할 수 있습니다.
@@ -62,14 +64,15 @@
     '찬란한 흉성':'radiant-star', '림보':'limbo', '발드릭스':'baldrix',
     '유피테르':'jupiter', '검은 마법사':'black-mage'
   };
+  const REAL_BOSS_IMAGES = new Set(window.MAPLE_BOSS_IMAGES || []);
   const bossCover = (boss, classname = 'boss-cover') => {
     const name = BOSS_ASSET_NAMES[boss];
-    const file = name ? `./assets/bosses/${name}.svg` : './assets/bosses/default.svg';
-    return `<span class="${classname}"><img src="${file}" loading="lazy" alt="${html(boss)} 이미지"></span>`;
+    const base = name ? `./assets/bosses/${name}` : './assets/bosses/default';
+    return `<span class="${classname}"><img src="${base}.${REAL_BOSS_IMAGES.has(name) ? 'png' : 'svg'}" loading="lazy" alt="${html(boss)} 이미지"></span>`;
   };
   const percentString = v => `${Number(v).toLocaleString('ko-KR', {maximumFractionDigits:2})}%`;
   const showTime = (percent, threshold) => { const seconds = Math.round(1200 * threshold / percent); return percent > 0 && Number.isFinite(seconds) ? `${Math.floor(seconds / 60).toLocaleString('ko-KR')}분 ${String(seconds % 60).padStart(2, '0')}초` : '—'; };
-  function defaultState() { const p = id(); return { version: 3, owners: [{ id: id(), name: '나', characters: [] }], parties: [{ id: p, name: '파티 1', capacity: 6, memberIds: [] }], selectedParty: p, bossKey: '주간|벨로나|노멀', level: 110, proxyUrl: '' }; }
+  function defaultState() { const p = id(); return { version: 3, owners: [{ id: id(), name: '나', characters: [] }], parties: [{ id: p, name: '파티 1', capacity: 6, memberIds: [] }], selectedParty: p, bossKey: '주간|벨로나|노멀', level: 110 }; }
 
   function parseState(raw) {
     if (!raw || !Array.isArray(raw.owners) || !Array.isArray(raw.parties)) throw Error('유효한 캐릭터·파티 백업이 아닙니다.');
@@ -86,7 +89,7 @@
           const n = valuePercent(val);
           if (BOSS_BY_ID.has(key) && n !== null) ratios[key] = n;
         }
-        return { id: charId, name: short(c.name, 30), kind: c.kind === 'alt' ? 'alt' : 'main', image: httpsUrl(c.image || c.avatar), job: short(c.job, 40), world: short(c.world, 40), level: Math.min(1000, Math.max(0, Number(c.level) || 0)), combatPower: Math.max(0, Number(c.combatPower) || 0), arcaneForce: optionalStat(c.arcaneForce), authenticForce: optionalStat(c.authenticForce), fetchedAt: short(c.fetchedAt, 50), ratios };
+        return { id: charId, name: short(c.name, 30), kind: c.kind === 'alt' ? 'alt' : 'main', image: httpsUrl(c.image || c.avatar), job: short(c.job, 40), world: short(c.world, 40), level: Math.min(1000, Math.max(0, Number(c.level) || 0)), combatPower: Math.max(0, Number(c.combatPower) || 0), arcaneForce: optionalStat(c.arcaneForce), authenticForce: optionalStat(c.authenticForce), fetchedAt: short(c.fetchedAt, 50), statStatus: short(c.statStatus, 30), ratios };
       }).filter(c => c.name)
     }));
     if (!owners.length) owners.push({ id: id(), name: '나', characters: [] });
@@ -96,7 +99,7 @@
       memberIds: [...new Set((Array.isArray(p.memberIds) ? p.memberIds : []).filter(x => seen.has(x)))].slice(0, Math.min(6, Math.max(1, Math.round(Number(p.capacity) || 6))))
     }));
     if (!parties.length) parties.push({ id: id(), name: '파티 1', capacity: 6, memberIds: [] });
-    return { version: 3, owners, parties, selectedParty: parties.some(p => p.id === raw.selectedParty) ? raw.selectedParty : parties[0].id, bossKey: BOSS_BY_ID.has(raw.bossKey) ? raw.bossKey : '주간|벨로나|노멀', level: LEVELS.some(x => x.n === Number(raw.level)) ? Number(raw.level) : 110, proxyUrl: httpsUrl(raw.proxyUrl) };
+    return { version: 3, owners, parties, selectedParty: parties.some(p => p.id === raw.selectedParty) ? raw.selectedParty : parties[0].id, bossKey: BOSS_BY_ID.has(raw.bossKey) ? raw.bossKey : '주간|벨로나|노멀', level: LEVELS.some(x => x.n === Number(raw.level)) ? Number(raw.level) : 110 };
   }
   function migrateV02(raw) {
     return parseState({
@@ -149,7 +152,7 @@
       }).join('')}</div><p class="hint-small">난이도를 체크하면 배율 입력칸이 열립니다. 입력값은 Enter 또는 포커스 이동 시 저장됩니다.</p>
     </div>`;
   }
-  function charPowers(ch) { return `<div class="char-stats"><span class="stat-chip stat-power"><small>전투력</small><b title="${Math.round(Number(ch.combatPower)||0).toLocaleString('ko-KR')}">${powerString(ch.combatPower)}</b></span><span class="stat-chip"><small>아케인포스</small><b>${forceString(ch.arcaneForce)}</b></span><span class="stat-chip"><small>어센틱포스</small><b>${forceString(ch.authenticForce)}</b></span></div>`; }
+  function charPowers(ch) { return `<div class="char-stats"><span class="stat-chip stat-power"><small>전투력</small><b title="${Math.round(Number(ch.combatPower)||0).toLocaleString('ko-KR')}">${powerString(ch.combatPower)}</b></span><span class="stat-chip"><small>아케인포스</small><b>${forceString(ch.arcaneForce)}</b></span><span class="stat-chip"><small>어센틱포스</small><b>${forceString(ch.authenticForce)}</b></span></div>${ch.statStatus === 'unavailable' ? '<span class="stat-warning">능력치 조회 실패 · 새로고침 권장</span>' : ''}`; }
   function openRatioDialog(charId) {
     const found = findCharacter(charId); if (!found) return;
     activeRatioCharId = charId;
@@ -167,7 +170,7 @@
     $('roster').innerHTML = state.owners.map(o => {
       const chars = o.characters.filter(c => c.name.toLocaleLowerCase().includes(rosterFilter.toLocaleLowerCase()));
       return `<section class="owner-group"><div class="owner-head"><span class="owner-bubble">${html(o.name.slice(0,1) || '나')}</span><span class="owner-name">${html(o.name)}</span><span class="owner-count">${o.characters.length}명</span><span class="grow"></span><button class="inline-action" data-action="rename-owner" data-id="${html(o.id)}">이름 변경</button><button class="inline-action danger-text" data-action="delete-owner" data-id="${html(o.id)}">삭제</button></div>
-       <div class="owner-characters">${chars.length ? chars.map(ch => `<article class="character" draggable="true" data-drag-char="${html(ch.id)}"><button type="button" class="character-top card-opener" data-action="open-ratios" data-id="${html(ch.id)}" aria-label="${html(ch.name)} 캐릭터의 보스 배율 설정">${avatar(ch)}<div class="char-info"><div class="char-name-line"><span class="char-name">${html(ch.name)}</span><span class="pill ${ch.kind === 'alt' ? 'alt' : ''}">${ch.kind === 'alt' ? '부캐' : '본캐'}</span></div><div class="char-meta">${charBrief(ch)}</div>${charPowers(ch)}</div><span class="open-arrow">›</span></button><div class="character-actions"><span class="drag-handle" title="파티 슬롯으로 끌어놓기">⠿ 드래그</span><button class="mini-add" type="button" data-action="add-member" data-id="${html(ch.id)}">＋ 파티</button><span class="grow"></span><button type="button" class="inline-action" data-action="open-ratios" data-id="${html(ch.id)}">보스 배율 ${Object.keys(ch.ratios).length}개 <span aria-hidden="true">›</span></button><button type="button" class="icon-button" title="캐릭터 정보 수정" aria-label="${html(ch.name)} 수정" data-action="edit-character" data-id="${html(ch.id)}">✎</button><button type="button" class="icon-button" title="캐릭터 삭제" aria-label="${html(ch.name)} 삭제" data-action="delete-character" data-id="${html(ch.id)}">✕</button></div></article>`).join('') : `<div class="empty">${rosterFilter ? '검색 결과가 없습니다.' : '캐릭터를 조회하거나 직접 등록하세요.'}</div>`}</div></section>`;
+       <div class="owner-characters">${chars.length ? chars.map(ch => `<article class="character" draggable="true" data-drag-char="${html(ch.id)}"><button type="button" class="character-top card-opener" data-action="open-ratios" data-id="${html(ch.id)}" aria-label="${html(ch.name)} 캐릭터의 보스 배율 설정">${avatar(ch)}<div class="char-info"><div class="char-name-line"><span class="char-name">${html(ch.name)}</span><span class="pill ${ch.kind === 'alt' ? 'alt' : ''}">${ch.kind === 'alt' ? '부캐' : '본캐'}</span></div><div class="char-meta">${charBrief(ch)}</div>${charPowers(ch)}</div><span class="open-arrow">›</span></button><div class="character-actions"><span class="drag-handle" title="파티 슬롯으로 끌어놓기">⠿ 드래그</span><button class="mini-add" type="button" data-action="add-member" data-id="${html(ch.id)}">＋ 파티</button><span class="grow"></span><button type="button" class="inline-action" data-action="open-ratios" data-id="${html(ch.id)}">보스 배율 ${Object.keys(ch.ratios).length}개 <span aria-hidden="true">›</span></button><button type="button" class="icon-button refresh-character" title="넥슨 정보 새로고침" aria-label="${html(ch.name)} 넥슨 정보 새로고침" data-action="refresh-character" data-id="${html(ch.id)}">↻</button><button type="button" class="icon-button" title="캐릭터 정보 수정" aria-label="${html(ch.name)} 수정" data-action="edit-character" data-id="${html(ch.id)}">✎</button><button type="button" class="icon-button" title="캐릭터 삭제" aria-label="${html(ch.name)} 삭제" data-action="delete-character" data-id="${html(ch.id)}">✕</button></div></article>`).join('') : `<div class="empty">${rosterFilter ? '검색 결과가 없습니다.' : '캐릭터를 조회하거나 직접 등록하세요.'}</div>`}</div></section>`;
     }).join('');
   }
   function renderBossSelect() { $('bossSelect').innerHTML = ['주간','월간'].map(period => `<optgroup label="${period} 보스">${ALL_BOSSES.filter(b => b.period === period).map(b => `<option value="${html(b.key)}">${html(b.title)}</option>`).join('')}</optgroup>`).join(''); $('bossSelect').value = state.bossKey; }
@@ -230,7 +233,7 @@
     const name = short(data.name, 30);
     if (!name) return toast('캐릭터명을 입력하세요.');
     if (state.owners.some(o => o.characters.some(c => c.name.toLocaleLowerCase() === name.toLocaleLowerCase()))) return toast('이미 보관함에 등록된 캐릭터입니다.');
-    const ch = { id:id(), name, kind:$('kindSelect').value === 'alt' ? 'alt' : 'main', image:httpsUrl(data.image), job:short(data.job,40), world:short(data.world,40), level:Math.max(0,Number(data.level)||0), combatPower:Math.max(0,Number(data.combatPower)||0), arcaneForce:optionalStat(data.arcaneForce), authenticForce:optionalStat(data.authenticForce), fetchedAt:short(data.fetchedAt,50), ratios:{} };
+    const ch = { id:id(), name, kind:$('kindSelect').value === 'alt' ? 'alt' : 'main', image:httpsUrl(data.image), job:short(data.job,40), world:short(data.world,40), level:Math.max(0,Number(data.level)||0), combatPower:Math.max(0,Number(data.combatPower)||0), arcaneForce:optionalStat(data.arcaneForce), authenticForce:optionalStat(data.authenticForce), fetchedAt:short(data.fetchedAt,50), statStatus:short(data.statStatus,30), ratios:{} };
     owner.characters.push(ch); save(); renderAll(); $('nicknameInput').value=''; $('lookupPreview').hidden=true; lookupResult=null; toast(`${name} 캐릭터가 ${owner.name} 보관함에 등록됐습니다.`);
   }
   function addMember(charId, index) {
@@ -251,6 +254,7 @@
     if (action === 'add-member') return addMember(key);
     if (action === 'remove-member') { currentParty().memberIds = currentParty().memberIds.filter(i => i !== key); save(); renderParty(); updateMath(); return; }
     if (action === 'open-ratios') return openRatioDialog(key);
+    if (action === 'refresh-character') return refreshCharacter(key);
     if (action === 'period') { return; }
     if (action === 'edit-character') {
       const found = findCharacter(key); if (!found) return;
@@ -275,28 +279,52 @@
     }
   }
 
+  async function fetchCharacterInfo(name) {
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(), 14000);
+    try {
+      const resp = await fetch(`${WORKER_URL}/character?name=${encodeURIComponent(name)}`, {
+        method: 'GET', signal: controller.signal, headers: { Accept: 'application/json' }
+      });
+      let data;
+      try { data = await resp.json(); } catch { throw Error(`API 응답 형식 오류 (${resp.status})`); }
+      if (!resp.ok) throw Error(typeof data.error === 'string' ? data.error : `조회 실패 (${resp.status})`);
+      if (!data || typeof data.name !== 'string' || data.name.length > 30) throw Error('API 응답 구조가 올바르지 않습니다.');
+      return {
+        name: short(data.name, 30), image: httpsUrl(data.image), job: short(data.job, 40),
+        world: short(data.world, 40), level: Number(data.level) || 0,
+        combatPower: Math.max(0, Number(data.combatPower) || 0),
+        arcaneForce: optionalStat(data.arcaneForce), authenticForce: optionalStat(data.authenticForce),
+        statStatus: short(data.statStatus, 30), fetchedAt: short(data.fetchedAt, 50)
+      };
+    } finally { clearTimeout(timer); }
+  }
+  async function refreshCharacter(charId) {
+    const found = findCharacter(charId); if (!found) return;
+    toast(`${found.character.name} 정보 조회 중...`);
+    try {
+      const fresh = await fetchCharacterInfo(found.character.name);
+      // 기존 사용자, 본캐/부캐, 개별 보스 배율, 파티 편성을 유지합니다.
+      Object.assign(found.character, fresh);
+      save(); renderAll();
+      toast(fresh.statStatus === 'unavailable' ? '캐릭터 기본 정보는 갱신됐지만 넥슨 능력치 조회가 실패했습니다.' : `${fresh.name} 캐릭터 정보를 갱신했습니다.`);
+    } catch (e) { toast(`갱신 실패: ${e.name === 'AbortError' ? '요청 시간 초과' : e.message}`); }
+  }
   async function lookup() {
     const name=short($('nicknameInput').value,30);
     if(!name)return toast('캐릭터명을 입력하세요.');
-    if(!state.proxyUrl){ toast('프록시가 미설정 상태입니다. 직접 추가하거나 API 설정에서 Worker 주소를 등록하세요.'); return; }
     const button=$('lookupBtn');button.disabled=true;button.textContent='조회 중...';
-    const controller=new AbortController();const timer=setTimeout(()=>controller.abort(),12000);
     try {
-      const url=`${state.proxyUrl.replace(/\/$/,'')}/character?name=${encodeURIComponent(name)}`;
-      const resp=await fetch(url,{method:'GET',signal:controller.signal,headers:{'Accept':'application/json'}});
-      let data; try {data=await resp.json();}catch{throw Error(`서버 응답이 JSON이 아닙니다. (${resp.status})`);}
-      if(!resp.ok)throw Error(typeof data.error==='string' ? data.error : `조회 실패 (${resp.status})`);
-      if(!data || typeof data.name!=='string' || data.name.length>30) throw Error('프록시 응답 구조가 올바르지 않습니다.');
-      lookupResult={name:short(data.name,30),image:httpsUrl(data.image),job:short(data.job,40),world:short(data.world,40),level:Number(data.level)||0,combatPower:Number(data.combatPower)||0,arcaneForce:optionalStat(data.arcaneForce),authenticForce:optionalStat(data.authenticForce),fetchedAt:short(data.fetchedAt,50)};
+      lookupResult = await fetchCharacterInfo(name);
       $('lookupPreview').hidden=false;
       $('lookupPreview').innerHTML=`<div class="lookup-inner">${avatar(lookupResult)}<div><strong>${html(lookupResult.name)}</strong><div class="lookup-meta">${charBrief(lookupResult)}</div>${charPowers(lookupResult)}</div><div class="lookup-actions"><button class="btn btn-primary" data-action="store-lookup" type="button">보관함에 저장</button><button class="icon-button" data-action="cancel-lookup" title="조회 결과 닫기" type="button">✕</button></div></div>`;
     } catch(e) { toast(e.name==='AbortError'?'조회 시간이 초과됐습니다.':`조회 오류: ${e.message}`); }
-    finally {clearTimeout(timer);button.disabled=false;button.textContent='넥슨 조회';}
+    finally {button.disabled=false;button.textContent='넥슨 조회';}
   }
 
   $('addOwnerBtn').addEventListener('click',()=>{const name=prompt('추가할 사용자 이름을 입력하세요.','사용자 2');if(name===null)return;const clean=short(name,30);if(!clean)return toast('이름을 입력하세요.');state.owners.push({id:id(),name:clean,characters:[]});save();renderAll();$('ownerSelect').value=state.owners.at(-1).id;});
   $('lookupBtn').addEventListener('click',lookup);
-  $('nicknameInput').addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault(); if(state.proxyUrl)lookup(); else addCharacter({name:$('nicknameInput').value});}});
+  $('nicknameInput').addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault(); lookup();}});
   $('manualAddBtn').addEventListener('click',()=>addCharacter({name:$('nicknameInput').value}));
   $('rosterSearch').addEventListener('input',e=>{rosterFilter=e.target.value;renderRoster();});
   $('addPartyBtn').addEventListener('click',()=>{const p={id:id(),name:`파티 ${state.parties.length+1}`,capacity:6,memberIds:[]};state.parties.push(p);state.selectedParty=p.id;save();renderParty();updateMath();});
@@ -306,13 +334,12 @@
   $('clearPartyBtn').addEventListener('click',()=>{const p=currentParty();if(!p.memberIds.length)return;if(!confirm('현재 파티의 편성을 비울까요? 캐릭터별 배율 기록은 유지됩니다.'))return;p.memberIds=[];save();renderParty();updateMath();});
   $('deletePartyBtn').addEventListener('click',()=>{if(state.parties.length<=1)return toast('파티는 최소 1개가 필요합니다.');const p=currentParty();if(!confirm(`${p.name}를 삭제할까요?`))return;state.parties=state.parties.filter(x=>x.id!==p.id);state.selectedParty=state.parties[0].id;save();renderParty();updateMath();});
 
-  $('settingsBtn').addEventListener('click',()=>{$('proxyUrl').value=state.proxyUrl;$('settingsDialog').showModal();});
-  $('settingsForm').addEventListener('submit',e=>{e.preventDefault();const raw=$('proxyUrl').value.trim();const valid=raw ? httpsUrl(raw) : '';if(raw&&!valid)return toast('HTTPS 주소만 사용 가능합니다.');state.proxyUrl=valid.replace(/\/$/,'');save();$('settingsDialog').close();toast('프록시 설정이 저장됐습니다.');});
   $('editForm').addEventListener('submit',e=>{e.preventDefault();const f=findCharacter($('editId').value);if(!f)return;const c=f.character;const name=short($('editName').value,30);if(!name)return toast('닉네임을 입력하세요.');if(state.owners.some(o=>o.characters.some(x=>x.id!==c.id&&x.name===name)))return toast('중복된 캐릭터명이 있습니다.');const imageRaw=$('editImage').value.trim();if(imageRaw&&!httpsUrl(imageRaw))return toast('캐릭터 이미지 주소는 HTTPS만 지원합니다.');Object.assign(c,{name,kind:$('editKind').value,job:short($('editJob').value,40),world:short($('editWorld').value,40),level:Number($('editLevel').value)||0,combatPower:Number($('editPower').value)||0,arcaneForce:optionalStat($('editArcane').value),authenticForce:optionalStat($('editAuthentic').value),image:httpsUrl(imageRaw)});save();$('editDialog').close();renderRoster();renderParty();updateMath();});
   document.addEventListener('click',e=>{
     const close=e.target.closest('[data-close]');if(close){$(close.dataset.close)?.close();return;}
     const target=e.target.closest('[data-action]');if(!target)return;
     const action=target.dataset.action,key=target.dataset.id;
+    if(action==='show-overview'){if(!selectedBossOpen)return toast('보스를 먼저 선택하세요.');$('overviewDialog').showModal();return;}
     if(action==='period'){charPeriod.set(key,target.dataset.period);renderRatioDialogBody();return;}
     if(action==='compare-period'){comparePeriod=target.dataset.period;selectedBossOpen=false;renderEstimate();renderOverview();return;}
     if(action==='close-compare'){selectedBossOpen=false;updateMath();return;}
@@ -405,7 +432,7 @@
   $('partySlots').addEventListener('dragover',e=>{const slot=e.target.closest('[data-drop-slot]');if(!slot)return;e.preventDefault();e.dataTransfer.dropEffect='move';slot.classList.add('over');});
   $('partySlots').addEventListener('dragleave',e=>{const slot=e.target.closest('[data-drop-slot]');if(slot&&!slot.contains(e.relatedTarget))slot.classList.remove('over');});
   $('partySlots').addEventListener('drop',e=>{const slot=e.target.closest('[data-drop-slot]');if(!slot)return;e.preventDefault();$('partySlots').querySelectorAll('.over').forEach(el=>el.classList.remove('over'));const charId=e.dataTransfer.getData('text/plain') || draggingCharId; if(findCharacter(charId))addMember(charId,Number(slot.dataset.dropSlot)); draggingCharId=null;});
-  $('backupBtn').addEventListener('click',()=>{const blob=new Blob([JSON.stringify({ ...state, exportedAt:new Date().toISOString() },null,2)],{type:'application/json'});const u=URL.createObjectURL(blob);const a=document.createElement('a');a.href=u;a.download=`maple-party-backup-${new Date().toISOString().slice(0,10)}.json`;document.body.append(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(u),1000);});
+  $('backupBtn').addEventListener('click',()=>{const blob=new Blob([JSON.stringify({ ...state, proxyUrl: undefined, exportedAt:new Date().toISOString() },null,2)],{type:'application/json'});const u=URL.createObjectURL(blob);const a=document.createElement('a');a.href=u;a.download=`maple-party-backup-${new Date().toISOString().slice(0,10)}.json`;document.body.append(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(u),1000);});
   $('restoreBtn').addEventListener('click',()=>$('importFile').click());
   $('importFile').addEventListener('change',async e=>{const f=e.target.files?.[0];if(!f)return;if(f.size>3_000_000){toast('3MB 이하 JSON 백업을 선택하세요.');e.target.value='';return;}try{const parsed=parseState(JSON.parse(await f.text()));if(!confirm('현재 브라우저에 저장된 데이터를 백업 파일로 교체할까요?'))return;state=parsed;expandedId=null;selectedBossOpen=false;save();renderAll();toast('백업 데이터를 복원했습니다.');}catch(err){toast(`복원 실패: ${err.message}`);}finally{e.target.value='';}});
 

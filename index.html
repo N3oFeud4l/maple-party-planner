@@ -6,22 +6,23 @@
   <meta name="color-scheme" content="light">
   <title>메이플 파티 배율 플래너</title>
   <link rel="stylesheet" href="./style.css">
+  <script src="./assets/bosses/manifest.js" defer></script>
   <script src="./app.js" defer></script>
 </head>
 <body>
   <div class="app-shell">
     <header class="topbar">
-      <div class="brand-icon" aria-hidden="true">✦</div>
+      <div class="brand-icon" aria-hidden="true"><img src="./assets/branding/mushroom.svg" alt=""></div>
       <div class="brand-copy"><strong>메이플 파티 플래너</strong><span>캐릭터별 보스 배율 · 파티 편성</span></div>
       <span class="top-pill"><span class="green-dot"></span><span id="saveStatus">브라우저에 저장</span></span>
       <button type="button" class="btn btn-quiet" id="backupBtn" title="JSON 파일로 백업"><span>⇩</span> 백업</button>
       <button type="button" class="btn btn-quiet" id="restoreBtn" title="백업한 JSON 파일 불러오기"><span>⇧</span> 복원</button>
-      <button type="button" class="btn btn-outline" id="settingsBtn">⚙ API 설정</button>
+      
       <input id="importFile" type="file" accept=".json,application/json" hidden>
     </header>
 
     <div class="intro">
-      <div><div class="eyebrow">PARTY BUILDER <span>v0.4.0</span></div><h1>우리 파티, 한눈에 관리해요</h1><p>캐릭터를 선택해 보스 배율을 기록하고, 파티 조합을 비교해 보세요.</p></div>
+      <div><div class="eyebrow">PARTY BUILDER <span>v0.5.0</span></div><h1>우리 파티, 한눈에</h1><p>캐릭터를 선택하고 배율을 기록해요. 파티별 예상 시간까지 한눈에.</p></div>
     </div>
 
     <main class="main-grid no-party" id="mainGrid">
@@ -31,7 +32,7 @@
           <button type="button" class="text-button" id="addOwnerBtn">＋ 사용자 추가</button>
         </div>
         <div class="add-bar">
-          <div class="search-field"><span aria-hidden="true">⌕</span><input id="nicknameInput" type="text" maxlength="30" autocomplete="off" placeholder="등록할 캐릭터 닉네임 검색" aria-label="캐릭터 닉네임"></div>
+          <div class="search-field"><span aria-hidden="true">⌕</span><input id="nicknameInput" type="text" maxlength="30" autocomplete="off" placeholder="닉네임 검색 · Enter" aria-label="캐릭터 닉네임"></div>
           <select id="ownerSelect" aria-label="저장할 사용자"></select>
           <select id="kindSelect" aria-label="캐릭터 유형"><option value="main">본캐</option><option value="alt">부캐</option></select>
           <button type="button" class="btn btn-primary" id="lookupBtn">넥슨 조회</button>
@@ -54,7 +55,7 @@
           <div class="helper">캐릭터를 끌어 놓거나 카드의 <b>+ 파티</b> 버튼으로 추가하세요. 같은 사용자는 한 캐릭터만 참여할 수 있어요.</div>
         </section>
         <section class="panel estimate-panel" aria-labelledby="estimateTitle">
-          <div class="panel-heading"><div class="section-heading"><span class="section-n">03</span><h2 id="estimateTitle">보스 배율 비교</h2></div></div>
+          <div class="panel-heading"><div class="section-heading"><span class="section-n">03</span><h2 id="estimateTitle">보스 배율 비교</h2></div><button class="text-button" type="button" data-action="show-overview">파티 비교 보기</button></div>
           <div class="boss-board-controls"><div class="tabs" id="comparePeriodTabs"><button type="button" class="tab active" data-action="compare-period" data-period="주간">주간</button><button type="button" class="tab" data-action="compare-period" data-period="월간">월간</button></div><input id="compareBossFilter" class="boss-filter" type="search" placeholder="보스 검색" aria-label="비교할 보스 찾기"></div>
           <div id="bossTiles" class="boss-tiles"></div>
           <div id="bossComparison" hidden>
@@ -72,12 +73,11 @@
         </section>
       </aside>
     </main>
-    <section class="panel overview-panel" id="partyOverview" aria-labelledby="overviewTitle" hidden><div class="panel-heading"><div class="section-heading"><span class="section-n">04</span><h2 id="overviewTitle">파티 조합 비교</h2></div><span class="muted">선택한 보스 기준</span></div><div id="overviewTable"></div></section>
-    <footer>메이플스토리 캐릭터 정보: NEXON Open API(선택 연동) · 개인 배율은 사용자가 직접 기록 · 저장 위치: 이 브라우저의 localStorage</footer>
+    <dialog id="overviewDialog" class="modal overview-dialog">    <section class="panel overview-panel" id="partyOverview" aria-labelledby="overviewTitle" hidden><div class="panel-heading"><div class="section-heading"><span class="section-n">04</span><h2 id="overviewTitle">파티 조합 비교</h2></div><span class="muted">선택한 보스 기준</span></div><div id="overviewTable"></div></section>
+<button class="btn btn-primary" type="button" data-close="overviewDialog">닫기</button></dialog>
+    <footer>메이플스토리 캐릭터 정보: NEXON Open API · 개인 배율은 사용자가 직접 기록 · 저장 위치: 이 브라우저의 localStorage</footer>
   </div>
   <div class="toast" id="toast" role="status" aria-live="polite"></div>
-
-  <dialog id="settingsDialog" class="modal"><form method="dialog" id="settingsForm"><div class="dialog-top"><h2>넥슨 API 프록시 설정</h2><button type="button" class="icon-button" data-close="settingsDialog" aria-label="닫기">✕</button></div><p class="muted">프록시 주소만 이 브라우저에 저장합니다. <b>넥슨 API 키는 입력하지 마세요.</b> Cloudflare Worker의 Secret으로 설정해야 합니다.</p><label class="stacked-label">프록시 기본 주소<input id="proxyUrl" type="url" placeholder="https://my-maple-proxy.example.workers.dev" autocomplete="url"></label><p class="muted">주소를 비워두면 수동 등록 모드로 사용합니다. HTTPS URL만 허용합니다.</p><div class="modal-footer"><button type="button" class="btn btn-quiet" data-close="settingsDialog">취소</button><button class="btn btn-primary" value="save" id="saveSettingsBtn">저장</button></div></form></dialog>
   <dialog id="editDialog" class="modal"><form id="editForm"><div class="dialog-top"><h2>캐릭터 정보 수정</h2><button type="button" class="icon-button" data-close="editDialog" aria-label="닫기">✕</button></div><input type="hidden" id="editId"><div class="form-grid"><label class="stacked-label">캐릭터명<input id="editName" required maxlength="30"></label><label class="stacked-label">본캐/부캐<select id="editKind"><option value="main">본캐</option><option value="alt">부캐</option></select></label><label class="stacked-label">직업<input id="editJob" maxlength="40"></label><label class="stacked-label">레벨<input id="editLevel" type="number" min="0" max="1000"></label><label class="stacked-label">전투력<input id="editPower" type="number" min="0" step="1" placeholder="예: 25000000"></label><label class="stacked-label">월드<input id="editWorld" maxlength="40"></label><label class="stacked-label">아케인포스<input id="editArcane" type="number" min="0" step="1" placeholder="미조회 시 공란"></label><label class="stacked-label">어센틱포스<input id="editAuthentic" type="number" min="0" step="1" placeholder="미조회 시 공란"></label><label class="stacked-label full">캐릭터 이미지 HTTPS URL<input id="editImage" type="url" placeholder="https://..."></label></div><div class="modal-footer"><button type="button" class="btn btn-quiet" data-close="editDialog">취소</button><button class="btn btn-primary" type="submit">저장</button></div></form></dialog>
   <dialog id="ratioDialog" class="modal ratio-dialog" aria-labelledby="ratioDialogTitle"><div class="dialog-top"><div><div class="eyebrow">CHARACTER &amp; BOSS</div><h2 id="ratioDialogTitle">보스 배율 관리</h2></div><button type="button" class="icon-button dialog-close" data-close="ratioDialog" aria-label="닫기">✕</button></div><div id="ratioCharacterInfo" class="ratio-character-info"></div><div id="ratioDialogBody" class="ratio-dialog-body"></div><div class="modal-footer"><button type="button" class="btn btn-primary" data-close="ratioDialog">완료</button></div></dialog>
 </body>

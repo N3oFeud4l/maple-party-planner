@@ -58,6 +58,7 @@ export default {
       if (basicResult.status === 'rejected') throw basicResult.reason;
       const basic = basicResult.value;
       const stat = statResult.status === 'fulfilled' ? statResult.value : {};
+      const statStatus = statResult.status === 'fulfilled' && Array.isArray(stat.final_stat) ? 'ok' : 'unavailable';
       const list = Array.isArray(stat.final_stat) ? stat.final_stat : [];
       const findStat = (...names) => {
         const raw = list.find(s => names.includes(String(s.stat_name).replace(/\s/g,'')))?.stat_value;
@@ -74,9 +75,10 @@ export default {
         job: basic.character_class || '',
         world: basic.world_name || '',
         level: Number(basic.character_level) || 0,
-        combatPower: combatPower ?? 0,
+        combatPower: combatPower ?? null,
         arcaneForce,
         authenticForce,
+        statStatus,
         fetchedAt: basic.date || new Date().toISOString(),
       });
     } catch (error) {
