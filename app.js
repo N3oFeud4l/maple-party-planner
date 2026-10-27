@@ -116,6 +116,9 @@ const BOSS_ASSET_NAMES = {
   let charPeriod = new Map();
   const draftRatioSelections = new Set();
   let rosterFilter = '';
+  const expandedOwners = new Set();
+  const manuallyCollapsedOwners = new Set();
+  let partyExpanded = state.parties.length === 1;
   let lookupResult = null;
   let toastTimer;
   const currentParty = () => state.parties.find(p => p.id === state.selectedParty) || state.parties[0];
@@ -198,20 +201,52 @@ const BOSS_ASSET_NAMES = {
     const found=findCharacter(activeRatioCharId);
     if (found) $('ratioDialogBody').innerHTML=bossEditor(found.character);
   }
+  function isOwnerOpen(owner) {
+    if (rosterFilter.trim()) return true;
+    if (expandedOwners.has(owner.id)) return true;
+    if (manuallyCollapsedOwners.has(owner.id)) return false;
+    return owner.characters.length < 2;
+  }
   function renderRoster() {
     $('characterCount').textContent = `${totalChars()}명`;
     $('roster').innerHTML = state.owners.map(o => {
       const chars = o.characters.filter(c => c.name.toLocaleLowerCase().includes(rosterFilter.toLocaleLowerCase()));
-      return `<section class="owner-group"><div class="owner-head"><span class="owner-bubble">${html(o.name.slice(0,1) || '나')}</span><span class="owner-name">${html(o.name)}</span><span class="owner-count">${o.characters.length}명</span><span class="grow"></span><button class="inline-action" data-action="rename-owner" data-id="${html(o.id)}">이름 변경</button><button class="inline-action danger-text" data-action="delete-owner" data-id="${html(o.id)}">삭제</button></div>
-       <div class="owner-characters">${chars.length ? chars.map(ch => `<article class="character" draggable="true" data-drag-char="${html(ch.id)}"><button type="button" class="character-top card-opener" data-action="open-ratios" data-id="${html(ch.id)}" aria-label="${html(ch.name)} 캐릭터의 보스 배율 설정">${avatar(ch)}<div class="char-info"><div class="char-name-line"><span class="char-name">${html(ch.name)}</span><span class="pill ${ch.kind === 'alt' ? 'alt' : ''}">${ch.kind === 'alt' ? '부캐' : '본캐'}</span></div><div class="char-meta">${charBrief(ch)}</div>${charPowers(ch)}</div><span class="open-arrow">›</span></button><div class="character-actions"><span class="drag-handle" title="파티 슬롯으로 끌어놓기">⠿ 드래그</span><button class="mini-add" type="button" data-action="add-member" data-id="${html(ch.id)}">＋ 파티</button><span class="grow"></span><button type="button" class="inline-action" data-action="open-ratios" data-id="${html(ch.id)}">보스 배율 ${Object.keys(ch.ratios).length}개 <span aria-hidden="true">›</span></button><button type="button" class="icon-button refresh-character" title="넥슨 정보 새로고침" aria-label="${html(ch.name)} 넥슨 정보 새로고침" data-action="refresh-character" data-id="${html(ch.id)}">↻</button><button type="button" class="icon-button" title="캐릭터 정보 수정" aria-label="${html(ch.name)} 수정" data-action="edit-character" data-id="${html(ch.id)}">✎</button><button type="button" class="icon-button" title="캐릭터 삭제" aria-label="${html(ch.name)} 삭제" data-action="delete-character" data-id="${html(ch.id)}">✕</button></div></article>`).join('') : `<div class="empty">${rosterFilter ? '검색 결과가 없습니다.' : '캐릭터를 조회하거나 직접 등록하세요.'}</div>`}</div></section>`;
+      const expanded = isOwnerOpen(o);
+      const previewNames = chars.slice(0, 3).map(ch => html(ch.name)).join(' · ');
+      const remain = Math.max(0, chars.length - 3);
+      const preview = chars.length
+        ? `<span class="owner-preview-images">${chars.slice(0, 3).map(ch=>avatar(ch)).join('')}${remain ? `<span class="preview-more">+${remain}</span>` : ''}</span><span class="owner-preview-names">${previewNames}${remain ? ` 외 ${remain}명` : ''}</span>`
+        : '<span class="owner-preview-names">등록된 캐릭터가 없어요</span>';
+      return `<section class="owner-group ${expanded ? 'expanded' : 'collapsed'}" data-owner-group="${html(o.id)}">
+        <div class="owner-head">
+          <button type="button" class="owner-toggle" data-action="toggle-owner" data-id="${html(o.id)}" aria-expanded="${expanded}" aria-label="${html(o.name)} 캐릭터 목록 ${expanded ? '접기' : '펼치기'}">
+            <span class="owner-bubble">${html(o.name.slice(0,1) || '나')}</span>
+            <span class="owner-title"><strong class="owner-name">${html(o.name)}</strong><span class="owner-count">${o.characters.length}명</span></span>
+            ${!expanded ? `<span class="owner-preview">${preview}</span>` : ''}
+            <span class="owner-chevron" aria-hidden="true">⌄</span>
+          </button>
+          <div class="owner-actions"><button type="button" class="inline-action" data-action="rename-owner" data-id="${html(o.id)}">이름 변경</button><button type="button" class="inline-action danger-text" data-action="delete-owner" data-id="${html(o.id)}">삭제</button></div>
+        </div>
+        ${expanded ? `<div class="owner-characters">${chars.length ? chars.map(ch => `<article class="character" draggable="true" data-drag-char="${html(ch.id)}"><button type="button" class="character-top card-opener" data-action="open-ratios" data-id="${html(ch.id)}" aria-label="${html(ch.name)} 캐릭터의 보스 배율 설정">${avatar(ch)}<div class="char-info"><div class="char-name-line"><span class="char-name">${html(ch.name)}</span><span class="pill ${ch.kind === 'alt' ? 'alt' : ''}">${ch.kind === 'alt' ? '부캐' : '본캐'}</span></div><div class="char-meta">${charBrief(ch)}</div>${charPowers(ch)}</div><span class="open-arrow">›</span></button><div class="character-actions"><span class="drag-handle" title="파티 슬롯으로 끌어놓기">⠿ 드래그</span><button class="mini-add" type="button" data-action="add-member" data-id="${html(ch.id)}">＋ 파티</button><span class="grow"></span><button type="button" class="inline-action" data-action="open-ratios" data-id="${html(ch.id)}">보스 배율 ${Object.keys(ch.ratios).length}개 <span aria-hidden="true">›</span></button><button type="button" class="icon-button refresh-character" title="넥슨 정보 새로고침" aria-label="${html(ch.name)} 넥슨 정보 새로고침" data-action="refresh-character" data-id="${html(ch.id)}">↻</button><button type="button" class="icon-button" title="캐릭터 정보 수정" aria-label="${html(ch.name)} 수정" data-action="edit-character" data-id="${html(ch.id)}">✎</button><button type="button" class="icon-button" title="캐릭터 삭제" aria-label="${html(ch.name)} 삭제" data-action="delete-character" data-id="${html(ch.id)}">✕</button></div></article>`).join('') : `<div class="empty">${rosterFilter ? '검색 결과가 없습니다.' : '캐릭터를 조회하거나 직접 등록하세요.'}</div>`}</div>` : ''}
+      </section>`;
     }).join('');
   }
   function renderBossSelect() { $('bossSelect').innerHTML = ['주간','월간'].map(period => `<optgroup label="${period} 보스">${ALL_BOSSES.filter(b => b.period === period).map(b => `<option value="${html(b.key)}">${html(b.title)}</option>`).join('')}</optgroup>`).join(''); $('bossSelect').value = state.bossKey; }
   function renderParty() {
-    $('partySelect').innerHTML = state.parties.map(p => `<option value="${html(p.id)}">${html(p.name)}</option>`).join('');
-    const party = currentParty(); $('partySelect').value = party.id; $('partyCapacity').value = String(party.capacity);
-    $('partyCurrentName').textContent = party.name;
-    $('partyList').innerHTML = state.parties.map(p => `<button type="button" class="party-choice ${p.id === party.id ? 'active' : ''}" data-action="switch-party" data-id="${html(p.id)}" aria-pressed="${p.id === party.id}"><span class="party-choice-text">${html(p.name)}</span><small>${p.memberIds.length}/${p.capacity}명</small>${p.id === party.id ? '<span class="party-check" aria-hidden="true">✓</span>' : ''}</button>`).join('');
+    const party = currentParty();
+    $('partyAccordion').innerHTML = state.parties.map((p, i) => {
+      const isSelected = p.id === party.id;
+      const isOpen = isSelected && partyExpanded;
+      const names = p.memberIds.map(charId => findCharacter(charId)?.character.name).filter(Boolean);
+      return `<button type="button" class="party-summary-card ${isOpen ? 'open' : ''} ${isSelected ? 'selected' : ''}" data-action="toggle-party" data-id="${html(p.id)}" aria-expanded="${isOpen}" aria-controls="partyDetailArea">
+        <span class="party-summary-index">${String(i + 1).padStart(2, '0')}</span>
+        <span class="party-summary-main"><strong>${html(p.name)}</strong><span class="party-summary-names">${names.length ? html(names.join(' · ')) : '파티원 미배정'}</span></span>
+        <span class="party-summary-size">${p.memberIds.length}/${p.capacity}명</span>
+        <span class="party-summary-chevron" aria-hidden="true">⌄</span>
+      </button>`;
+    }).join('');
+    $('partyDetailArea').hidden = !partyExpanded;
+    $('partyCapacity').value = String(party.capacity);
     $('partySlots').innerHTML = Array.from({length:party.capacity}, (_, i) => {
       const found = findCharacter(party.memberIds[i]);
       return `<div class="slot ${found ? 'filled' : ''}" data-drop-slot="${i}"><span class="slot-number">${i+1}</span>${found ? `${avatar(found.character)}<div class="slot-details"><strong>${html(found.character.name)}</strong><small>${html(found.owner.name)} · ${powerString(found.character.combatPower)}</small></div><button class="slot-remove" type="button" aria-label="${html(found.character.name)} 파티 제외" data-action="remove-member" data-id="${html(found.character.id)}">✕</button>` : '<span class="slot-plus">＋</span><div class="slot-placeholder">캐릭터 배치</div>'}</div>`;
@@ -287,7 +322,7 @@ function renderEstimate() {
     } else if (arr.length >= party.capacity && existing === -1) {
       arr.splice(index, 1, charId);
     } else { arr.splice(Math.min(index, arr.length), 0, charId); }
-    party.memberIds = arr.slice(0,party.capacity); save(); renderParty(); updateMath();
+    party.memberIds = arr.slice(0,party.capacity); partyExpanded = true; save(); renderParty(); updateMath();
   }
   function manage(action, key) {
     if (action === 'add-member') return addMember(key);
@@ -408,11 +443,11 @@ function renderEstimate() {
       confirmText: '만들기', onConfirm: name => {
         const party = {id:id(),name:short(name,40),capacity:6,memberIds:[]};
         state.parties.push(party); state.selectedParty = party.id;
+        partyExpanded = state.parties.length === 1;
         save(); renderParty(); updateMath();
       }
     });
   });
-  $('partySelect').addEventListener('change',e=>{state.selectedParty=e.target.value;save();renderParty();updateMath();});
   $('partyCapacity').addEventListener('change', e => {
     const party = currentParty(), next = Number(e.target.value);
     const apply = () => { party.capacity=next; party.memberIds=party.memberIds.slice(0,next); save(); renderParty(); updateMath(); };
@@ -438,7 +473,7 @@ function renderEstimate() {
     if (state.parties.length <= 1) return toast('파티는 최소 1개가 필요해요.');
     const party = currentParty();
     openActionDialog({title:'파티 삭제',message:`${party.name} 파티를 삭제할까요? 캐릭터별 배율 기록은 유지돼요.`,confirmText:'삭제',danger:true,
-      onConfirm: () => {state.parties=state.parties.filter(p=>p.id!==party.id);state.selectedParty=state.parties[0].id;save();renderParty();updateMath();}});
+      onConfirm: () => {state.parties=state.parties.filter(p=>p.id!==party.id);state.selectedParty=state.parties[0].id;partyExpanded = state.parties.length === 1;save();renderParty();updateMath();}});
   });
 
   $('editForm').addEventListener('submit',e=>{e.preventDefault();const f=findCharacter($('editId').value);if(!f)return;const c=f.character;const name=short($('editName').value,30);if(!name)return toast('닉네임을 입력하세요.');if(state.owners.some(o=>o.characters.some(x=>x.id!==c.id&&x.name===name)))return toast('중복된 캐릭터명이 있습니다.');const imageRaw=$('editImage').value.trim();if(imageRaw&&!httpsUrl(imageRaw))return toast('캐릭터 이미지 주소는 HTTPS만 지원합니다.');Object.assign(c,{name,kind:$('editKind').value,job:short($('editJob').value,40),world:short($('editWorld').value,40),level:Number($('editLevel').value)||0,combatPower:Number($('editPower').value)||0,image:httpsUrl(imageRaw)});save();$('editDialog').close();renderRoster();renderParty();updateMath();});
@@ -446,11 +481,20 @@ function renderEstimate() {
     const close=e.target.closest('[data-close]');if(close){$(close.dataset.close)?.close();return;}
     const target=e.target.closest('[data-action]');if(!target)return;
     const action=target.dataset.action,key=target.dataset.id;
-    if(action==='switch-party'){
+    if(action==='toggle-owner') {
+      const owner = state.owners.find(o => o.id === key); if (!owner) return;
+      if (isOwnerOpen(owner)) {
+        expandedOwners.delete(key); manuallyCollapsedOwners.add(key);
+      } else {
+        manuallyCollapsedOwners.delete(key); expandedOwners.add(key);
+      }
+      renderRoster(); return;
+    }
+    if(action==='toggle-party') {
       if (!state.parties.some(p => p.id === key)) return;
-      state.selectedParty = key;
-      $('partySwitcher').open = false;
-      save(); renderParty(); updateMath(); return;
+      if (state.selectedParty === key) partyExpanded = !partyExpanded;
+      else { state.selectedParty = key; partyExpanded = true; save(); }
+      renderParty(); updateMath(); return;
     }
     if(action==='show-overview'){if(!selectedBossOpen)return toast('보스를 먼저 선택하세요.');$('overviewDialog').showModal();return;}
     if(action==='period'){charPeriod.set(key,target.dataset.period);renderRatioDialogBody();return;}
@@ -558,6 +602,8 @@ function renderEstimate() {
         confirmText: '복원', danger: true,
         onConfirm: () => {
           state = parsed; expandedId = null; selectedBossOpen = false;
+          expandedOwners.clear(); manuallyCollapsedOwners.clear();
+          partyExpanded = state.parties.length === 1;
           save(); renderAll(); toast('백업을 복원했어요.');
         }
       });
@@ -573,6 +619,7 @@ function renderEstimate() {
         try { localStorage.removeItem(STORE); localStorage.removeItem(OLD_STORE); }
         catch (e) { console.error(e); return toast('초기화하지 못했어요. 저장 공간을 확인해 주세요.'); }
         state = defaultState(); expandedId=null; selectedBossOpen=false; activeRatioCharId=null;
+        expandedOwners.clear(); manuallyCollapsedOwners.clear(); partyExpanded = true;
         charPeriod.clear(); draftRatioSelections.clear(); lookupResult=null; rosterFilter=''; comparePeriod='주간';
         $('nicknameInput').value=''; $('rosterSearch').value=''; $('compareBossFilter').value='';
         $('lookupPreview').hidden=true; $('lookupPreview').innerHTML='';

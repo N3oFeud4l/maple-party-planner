@@ -45,20 +45,18 @@
       <aside class="right-column" id="partyWorkspace" hidden>
         <section class="panel party-panel" aria-labelledby="partyTitle">
           <div class="panel-heading"><div class="section-heading"><span class="section-n">02</span><h2 id="partyTitle">파티 편성</h2></div><button class="text-button" id="addPartyBtn">＋ 파티 추가</button></div>
-          <div class="party-toolbar">
-            <div class="party-switcher-wrap">
-              <span class="field-caption">편성할 파티</span>
-              <details id="partySwitcher" class="party-switcher">
-                <summary aria-label="파티 목록 펼치기"><span class="party-switcher-label" id="partyCurrentName">파티 1</span><span class="party-switcher-chevron" aria-hidden="true">⌄</span></summary>
-                <div id="partyList" class="party-switcher-list" role="group" aria-label="파티 선택"></div>
-              </details>
-              <select id="partySelect" hidden aria-label="현재 파티"></select>
+          <div id="partyAccordion" class="party-accordion" aria-label="파티 목록"></div>
+          <div id="partyDetailArea" class="party-detail-area" hidden>
+            <div class="party-detail-bar">
+              <span class="party-detail-caption">선택한 파티 편성</span>
+              <label class="party-capacity-label">파티 인원
+                <select id="partyCapacity" aria-label="현재 파티 최대 인원"><option value="1">1명</option><option value="2">2명</option><option value="3">3명</option><option value="4">4명</option><option value="5">5명</option><option value="6">6명</option></select>
+              </label>
             </div>
-            <label class="stacked-label capacity-label">파티 인원<select id="partyCapacity"><option value="1">1명</option><option value="2">2명</option><option value="3">3명</option><option value="4">4명</option><option value="5">5명</option><option value="6">6명</option></select></label>
+            <div class="party-actions"><button id="renamePartyBtn" class="inline-action">이름 변경</button><button id="clearPartyBtn" class="inline-action">파티 비우기</button><button id="deletePartyBtn" class="inline-action danger-text">파티 삭제</button></div>
+            <div id="partySlots" class="party-slots"></div>
+            <div class="helper">캐릭터를 슬롯에 드래그하거나 + 파티 버튼으로 추가할 수 있어요.</div>
           </div>
-          <div class="party-actions"><button id="renamePartyBtn" class="inline-action">이름 변경</button><button id="clearPartyBtn" class="inline-action">파티 비우기</button><button id="deletePartyBtn" class="inline-action danger-text">파티 삭제</button></div>
-          <div id="partySlots" class="party-slots"></div>
-          <div class="helper">드래그하거나 + 파티로 추가 · 사용자별 1캐릭터</div>
         </section>
         <section class="panel estimate-panel" aria-labelledby="estimateTitle">
           <div class="panel-heading"><div class="section-heading"><span class="section-n">03</span><h2 id="estimateTitle">보스 배율 비교</h2></div><button class="text-button" type="button" data-action="show-overview">파티 비교 보기</button></div>
