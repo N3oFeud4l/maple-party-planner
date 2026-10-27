@@ -1,32 +1,22 @@
-# 메이플 파티 플래너 v0.6.3
+# 메이플 파티 플래너 v0.6.5
 
-GitHub Pages / Cloudflare Pages에 그대로 배포할 수 있는 정적 웹앱입니다.
+기존 v0.6.3의 캐릭터·파티·보스 기능을 유지하면서 Lucide SVG 아이콘으로 UI 컨트롤을 통일했습니다.
 
-## v0.6.3 업데이트
-- 파티 선택 `select`와 드롭다운 목록을 삭제하고 모든 파티를 요약 카드 형태로 배치합니다. 한 카드를 누르면 해당 파티 슬롯이 펼쳐지고, 다시 누르면 접힙니다.
-- 파티가 2개 이상이면 접힌 상태로 시작하며 각 카드에 파티명, 편성 인원, 멤버 이름이 나타납니다. 파티가 1개일 때는 바로 편성할 수 있도록 슬롯이 펼쳐집니다.
-- 사용자에게 캐릭터가 2명 이상이면 기본적으로 접힌 보관함으로 표시합니다. 사용자 제목을 누르면 전체 캐릭터 카드가 펼쳐집니다. 닉네임 필터 검색 중에는 검색 결과를 자동으로 펼칩니다.
-- 기존 localStorage/Cloudflare Worker 연동/보스 배율 입력/파티 드래그 및 JSON 백업을 유지합니다.
-
-## 이전 버전의 변경 사항
-- PC의 캐릭터 / 파티 / 보스 비교 패널 폭을 균등하게 재배분했습니다.
-- 캐릭터 목록이 짧을 때 왼쪽 패널 아래에 생기는 빈 공간을 줄였습니다.
-- 캐릭터 프로필 이미지 영역과 내부 스프라이트 배율을 키웠습니다. 원본 저해상도 자체를 고해상도로 바꾼 것은 아닙니다.
-- 아케인포스, 어센틱포스는 모든 화면 및 수정 입력에서 숨겼습니다. 기존 저장 데이터는 유지됩니다.
-- 파티 목록은 각 파티별 요약 카드로 구성하고, 선택한 파티의 편성 슬롯만 아코디언으로 펼쳐 표시합니다.
-- 모든 보스 이미지는 사용자가 제공한 `assets/bosses/*.png`만 참조합니다.
-- 불필요한 SVG 보스 문양, 예전 자쿰 이미지 및 `download_assets.py`를 제거했습니다.
-- 파티 편성, 캐릭터 관리, 배율 기록, JSON 백업, 기존 Worker API는 유지합니다.
+## 이번 업데이트
+- 사용자·파티 접기/펼치기 화살표, 캐릭터 상세 이동, 보스 난이도 펼침 화살표를 동일한 Lucide chevron으로 변경
+- 추가, 닫기, 수정, 새로고침, 검색, 백업, 복원, 초기화, 드래그 아이콘 교체
+- 버튼의 아이콘 크기·정렬·간격과 select 화살표 정렬 개선
+- 아이콘은 `assets/icons/`에서 로컬로 제공하므로 외부 CDN, 아이콘 폰트, API 연결이 필요하지 않음
+- 모든 기존 `localStorage` 데이터·Cloudflare Worker 설정 유지
 
 ## 배포
-GitHub 저장소의 `index.html`, `style.css`, `app.js`, `assets/`를 업로드하고 Cloudflare Pages의 자동 배포를 확인하세요.
-Worker는 업데이트하지 않아도 됩니다.
+기존 저장소의 `index.html`, `style.css`, `app.js`, `assets/icons/` 폴더를 업데이트합니다. 이전 버전 파일은 그대로 포함되어 있으며 Worker 배포는 불필요합니다.
 
-## 저장 데이터
-이전 버전과 동일한 `maple_party_planner_web_v03` 키를 사용합니다. 배포 전에 JSON 백업을 권장합니다.
+## 아이콘 출처
+Lucide 6.7.2, Fonticons Inc. SVG 아이콘(Creative Commons Attribution 4.0). 자세한 내용은 `assets/icons/ATTRIBUTION.md`를 확인하세요.
 
-## 보스 이미지 추가
-사용자가 제공하는 PNG를 `assets/bosses/`에 추가하고 `app.js`의 `BOSS_GROUPS` 및 `BOSS_ASSET_NAMES`를 맞추면 됩니다.
-
-## 이미지 및 배율 유의사항
-게임 이미지는 권리자의 사용 조건을 확인하세요. 개인 보스 배율의 단순 합계는 실제 파티 배율 또는 확정 클리어 시간이 아닙니다.
+## v0.6.5 — Lucide icons
+- Button, search, caret, edit, delete, refresh and backup/restore icons use local Lucide SVG assets.
+- A uniform 16px base size and 1.75px strokes improve alignment.
+- `assets/icons/LICENSE.md` records license details. No online CDN required.
+- Existing localStorage keys and Cloudflare Worker settings are unchanged.

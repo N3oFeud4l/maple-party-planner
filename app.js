@@ -1,6 +1,8 @@
 (() => {
   'use strict';
 
+  // Lucide SVG icons are bundled locally with the project.
+  const lucideIcon = (name, extra = '') => `<span class="lucide-icon lucide-${name}${extra ? ` ${extra}` : ''}" aria-hidden="true"></span>`;
   const STORE = 'maple_party_planner_web_v03';
   // 서버 주소만 공개해도 됩니다. 실제 넥슨 API 키는 Worker Secret에 보관합니다.
   const WORKER_URL = 'https://maple-nexon-api.maple-party-planner.workers.dev';
@@ -166,7 +168,7 @@ const BOSS_ASSET_NAMES = {
     action?.onCancel?.();
   });
 
-  function avatar(ch) { return `<span class="avatar"><span class="placeholder" aria-hidden="true">✦</span>${ch.image ? `<img src="${html(httpsUrl(ch.image))}" loading="lazy" referrerpolicy="no-referrer" alt="${html(ch.name)} 캐릭터 이미지" onerror="this.remove()">` : ''}</span>`; }
+  function avatar(ch) { return `<span class="avatar"><span class="placeholder" aria-hidden="true">${lucideIcon("user")}</span>${ch.image ? `<img src="${html(httpsUrl(ch.image))}" loading="lazy" referrerpolicy="no-referrer" alt="${html(ch.name)} 캐릭터 이미지" onerror="this.remove()">` : ''}</span>`; }
   function charBrief(ch) { return [ch.job, ch.level ? `Lv.${ch.level}` : '', ch.world].filter(Boolean).map(html).join(' · ') || '직업·레벨 미등록'; }
   function renderOwnerSelect() { const prev = $('ownerSelect').value; $('ownerSelect').innerHTML = state.owners.map(o => `<option value="${html(o.id)}">${html(o.name)}</option>`).join(''); if (state.owners.some(o => o.id === prev)) $('ownerSelect').value = prev; }
   function selectedBossLabel() { const b = BOSS_BY_ID.get(state.bossKey); return b ? b.title : '보스 미선택'; }
@@ -223,11 +225,11 @@ const BOSS_ASSET_NAMES = {
             <span class="owner-bubble">${html(o.name.slice(0,1) || '나')}</span>
             <span class="owner-title"><strong class="owner-name">${html(o.name)}</strong><span class="owner-count">${o.characters.length}명</span></span>
             ${!expanded ? `<span class="owner-preview">${preview}</span>` : ''}
-            <span class="owner-chevron" aria-hidden="true">⌄</span>
+            ${lucideIcon("chevron-down", "owner-chevron")}
           </button>
           <div class="owner-actions"><button type="button" class="inline-action" data-action="rename-owner" data-id="${html(o.id)}">이름 변경</button><button type="button" class="inline-action danger-text" data-action="delete-owner" data-id="${html(o.id)}">삭제</button></div>
         </div>
-        ${expanded ? `<div class="owner-characters">${chars.length ? chars.map(ch => `<article class="character" draggable="true" data-drag-char="${html(ch.id)}"><button type="button" class="character-top card-opener" data-action="open-ratios" data-id="${html(ch.id)}" aria-label="${html(ch.name)} 캐릭터의 보스 배율 설정">${avatar(ch)}<div class="char-info"><div class="char-name-line"><span class="char-name">${html(ch.name)}</span><span class="pill ${ch.kind === 'alt' ? 'alt' : ''}">${ch.kind === 'alt' ? '부캐' : '본캐'}</span></div><div class="char-meta">${charBrief(ch)}</div>${charPowers(ch)}</div><span class="open-arrow">›</span></button><div class="character-actions"><span class="drag-handle" title="파티 슬롯으로 끌어놓기">⠿ 드래그</span><button class="mini-add" type="button" data-action="add-member" data-id="${html(ch.id)}">＋ 파티</button><span class="grow"></span><button type="button" class="inline-action" data-action="open-ratios" data-id="${html(ch.id)}">보스 배율 ${Object.keys(ch.ratios).length}개 <span aria-hidden="true">›</span></button><button type="button" class="icon-button refresh-character" title="넥슨 정보 새로고침" aria-label="${html(ch.name)} 넥슨 정보 새로고침" data-action="refresh-character" data-id="${html(ch.id)}">↻</button><button type="button" class="icon-button" title="캐릭터 정보 수정" aria-label="${html(ch.name)} 수정" data-action="edit-character" data-id="${html(ch.id)}">✎</button><button type="button" class="icon-button" title="캐릭터 삭제" aria-label="${html(ch.name)} 삭제" data-action="delete-character" data-id="${html(ch.id)}">✕</button></div></article>`).join('') : `<div class="empty">${rosterFilter ? '검색 결과가 없습니다.' : '캐릭터를 조회하거나 직접 등록하세요.'}</div>`}</div>` : ''}
+        ${expanded ? `<div class="owner-characters">${chars.length ? chars.map(ch => `<article class="character" draggable="true" data-drag-char="${html(ch.id)}"><button type="button" class="character-top card-opener" data-action="open-ratios" data-id="${html(ch.id)}" aria-label="${html(ch.name)} 캐릭터의 보스 배율 설정">${avatar(ch)}<div class="char-info"><div class="char-name-line"><span class="char-name">${html(ch.name)}</span><span class="pill ${ch.kind === 'alt' ? 'alt' : ''}">${ch.kind === 'alt' ? '부캐' : '본캐'}</span></div><div class="char-meta">${charBrief(ch)}</div>${charPowers(ch)}</div>${lucideIcon("chevron-right", "open-arrow")}</button><div class="character-actions"><span class="drag-handle" title="파티 슬롯으로 끌어놓기">${lucideIcon("grip-vertical")} 드래그</span><button class="mini-add" type="button" data-action="add-member" data-id="${html(ch.id)}">${lucideIcon("plus")} 파티</button><span class="grow"></span><button type="button" class="inline-action" data-action="open-ratios" data-id="${html(ch.id)}">보스 배율 ${Object.keys(ch.ratios).length}개 ${lucideIcon("chevron-right")}</button><button type="button" class="icon-button refresh-character" title="넥슨 정보 새로고침" aria-label="${html(ch.name)} 넥슨 정보 새로고침" data-action="refresh-character" data-id="${html(ch.id)}">${lucideIcon("refresh-cw")}</button><button type="button" class="icon-button" title="캐릭터 정보 수정" aria-label="${html(ch.name)} 수정" data-action="edit-character" data-id="${html(ch.id)}">${lucideIcon("pencil")}</button><button type="button" class="icon-button" title="캐릭터 삭제" aria-label="${html(ch.name)} 삭제" data-action="delete-character" data-id="${html(ch.id)}">${lucideIcon("x")}</button></div></article>`).join('') : `<div class="empty">${rosterFilter ? '검색 결과가 없습니다.' : '캐릭터를 조회하거나 직접 등록하세요.'}</div>`}</div>` : ''}
       </section>`;
     }).join('');
   }
@@ -242,14 +244,14 @@ const BOSS_ASSET_NAMES = {
         <span class="party-summary-index">${String(i + 1).padStart(2, '0')}</span>
         <span class="party-summary-main"><strong>${html(p.name)}</strong><span class="party-summary-names">${names.length ? html(names.join(' · ')) : '파티원 미배정'}</span></span>
         <span class="party-summary-size">${p.memberIds.length}/${p.capacity}명</span>
-        <span class="party-summary-chevron" aria-hidden="true">⌄</span>
+        ${lucideIcon("chevron-down", "party-summary-chevron")}
       </button>`;
     }).join('');
     $('partyDetailArea').hidden = !partyExpanded;
     $('partyCapacity').value = String(party.capacity);
     $('partySlots').innerHTML = Array.from({length:party.capacity}, (_, i) => {
       const found = findCharacter(party.memberIds[i]);
-      return `<div class="slot ${found ? 'filled' : ''}" data-drop-slot="${i}"><span class="slot-number">${i+1}</span>${found ? `${avatar(found.character)}<div class="slot-details"><strong>${html(found.character.name)}</strong><small>${html(found.owner.name)} · ${powerString(found.character.combatPower)}</small></div><button class="slot-remove" type="button" aria-label="${html(found.character.name)} 파티 제외" data-action="remove-member" data-id="${html(found.character.id)}">✕</button>` : '<span class="slot-plus">＋</span><div class="slot-placeholder">캐릭터 배치</div>'}</div>`;
+      return `<div class="slot ${found ? 'filled' : ''}" data-drop-slot="${i}"><span class="slot-number">${i+1}</span>${found ? `${avatar(found.character)}<div class="slot-details"><strong>${html(found.character.name)}</strong><small>${html(found.owner.name)} · ${powerString(found.character.combatPower)}</small></div><button class="slot-remove" type="button" aria-label="${html(found.character.name)} 파티 제외" data-action="remove-member" data-id="${html(found.character.id)}">${lucideIcon("x")}</button>` : `<span class="slot-plus">${lucideIcon("plus")}</span><div class="slot-placeholder">캐릭터 배치</div>`}</div>`;
     }).join('');
   }
   function detailsFor(party) {
@@ -413,7 +415,7 @@ function renderEstimate() {
     try {
       lookupResult = await fetchCharacterInfo(name);
       $('lookupPreview').hidden=false;
-      $('lookupPreview').innerHTML=`<div class="lookup-inner">${avatar(lookupResult)}<div><strong>${html(lookupResult.name)}</strong><div class="lookup-meta">${charBrief(lookupResult)}</div>${charPowers(lookupResult)}</div><div class="lookup-actions"><button class="btn btn-primary" data-action="store-lookup" type="button">보관함에 저장</button><button class="icon-button" data-action="cancel-lookup" title="조회 결과 닫기" type="button">✕</button></div></div>`;
+      $('lookupPreview').innerHTML=`<div class="lookup-inner">${avatar(lookupResult)}<div><strong>${html(lookupResult.name)}</strong><div class="lookup-meta">${charBrief(lookupResult)}</div>${charPowers(lookupResult)}</div><div class="lookup-actions"><button class="btn btn-primary" data-action="store-lookup" type="button">보관함에 저장</button><button class="icon-button" data-action="cancel-lookup" title="조회 결과 닫기" type="button">${lucideIcon("x")}</button></div></div>`;
     } catch(e) { toast(e.name==='AbortError'?'조회 시간이 초과됐습니다.':`조회 오류: ${e.message}`); }
     finally {button.disabled=false;button.textContent='넥슨 조회';}
   }

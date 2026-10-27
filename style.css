@@ -489,3 +489,38 @@ h1{font-size:30px;line-height:1.32;letter-spacing:-1.4px;font-weight:850}h2{font
   .owner-preview{justify-content:flex-start}
   .owner-actions{gap:3px}
 }
+
+
+/* v0.6.5: Lucide — local vector icons, 16px baseline / 1.75px stroke */
+.lucide-icon{display:inline-block;width:16px;height:16px;min-width:16px;flex:0 0 auto;background-color:currentColor;vertical-align:middle;-webkit-mask-image:var(--lucide-asset);mask-image:var(--lucide-asset);-webkit-mask-repeat:no-repeat;mask-repeat:no-repeat;-webkit-mask-position:center;mask-position:center;-webkit-mask-size:contain;mask-size:contain}
+.lucide-chevron-down{--lucide-asset:url("./assets/icons/chevron-down.svg")}
+.lucide-chevron-right{--lucide-asset:url("./assets/icons/chevron-right.svg")}
+.lucide-plus{--lucide-asset:url("./assets/icons/plus.svg")}
+.lucide-x{--lucide-asset:url("./assets/icons/x.svg")}
+.lucide-search{--lucide-asset:url("./assets/icons/search.svg")}
+.lucide-refresh-cw{--lucide-asset:url("./assets/icons/refresh-cw.svg")}
+.lucide-pencil{--lucide-asset:url("./assets/icons/pencil.svg")}
+.lucide-grip-vertical{--lucide-asset:url("./assets/icons/grip-vertical.svg")}
+.lucide-download{--lucide-asset:url("./assets/icons/download.svg")}
+.lucide-upload{--lucide-asset:url("./assets/icons/upload.svg")}
+.lucide-rotate-ccw{--lucide-asset:url("./assets/icons/rotate-ccw.svg")}
+.lucide-user{--lucide-asset:url("./assets/icons/user.svg")}
+
+/* Identical hit targets and geometrically centered icons across browsers. */
+.topbar .btn,.text-button,.mini-add,.drag-handle,.icon-button,.slot-remove{display:inline-flex;align-items:center;justify-content:center;gap:7px;line-height:1.25}
+.icon-button,.slot-remove{padding:0;line-height:1;flex-shrink:0}
+.icon-button .lucide-icon,.slot-remove .lucide-icon{width:16px;height:16px;min-width:16px;vertical-align:middle}
+.text-button .lucide-icon,.mini-add .lucide-icon,.topbar .btn .lucide-icon{width:15px;height:15px;min-width:15px}
+.search-field>.lucide-icon{width:16px;height:16px;min-width:16px;opacity:.9}
+.owner-chevron,.party-summary-chevron{display:inline-block;width:16px;height:16px;min-width:16px;color:#8390a0;transition:transform .18s ease;transform-origin:center}
+.owner-group.expanded .owner-chevron,.party-summary-card.open .party-summary-chevron{transform:rotate(180deg)}
+.open-arrow{display:inline-block;width:16px;height:16px;min-width:16px;align-self:center;margin-left:4px;color:#aebacc}
+.drag-handle .lucide-icon{width:14px;height:14px;min-width:14px}
+.slot-plus{display:grid;place-items:center;color:#a8bcda}
+.slot-plus .lucide-icon{width:20px;height:20px;min-width:20px}
+.avatar .placeholder{display:grid;place-items:center}
+.avatar .placeholder .lucide-icon{width:20px;height:20px;min-width:20px}
+.boss-group summary::after,.boss-group[open] summary::after{content:"";width:14px;height:14px;flex:0 0 14px;margin-left:auto;background-color:#8897aa;-webkit-mask:url("./assets/icons/chevron-down.svg") center / contain no-repeat;mask:url("./assets/icons/chevron-down.svg") center / contain no-repeat;transition:transform .18s ease}
+.boss-group[open] summary::after{transform:rotate(180deg)}
+#ownerSelect,#kindSelect,#partyCapacity{appearance:none;-webkit-appearance:none;background-color:#fff;background-image:url("./assets/icons/chevron-down.svg");background-repeat:no-repeat;background-position:right 10px center;background-size:14px 14px;padding-right:32px}
+@media(max-width:740px){.topbar .btn{gap:6px}.text-button{gap:6px}}
