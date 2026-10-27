@@ -7,29 +7,27 @@
   const OLD_STORE = 'maple_party_planner_web_v02';
   const LEVELS = [{ n: 100, label: '최소컷' }, { n: 110, label: '기본 배율' }, { n: 130, label: '메청년 비율' }, { n: 150, label: '메린이 비율' }, { n: 200, label: '메애기 비율' }];
   // 보스/난이도 목록은 코드에 정적으로 두며 필요시 유지보수할 수 있습니다.
-  const BOSS_GROUPS = [
-    ['주간', '자쿰', ['카오스']], ['주간', '매그너스', ['하드']],
-    ['주간', '힐라', ['하드']], ['주간', '파풀라투스', ['카오스']],
-    ['주간', '피에르', ['카오스']], ['주간', '반반', ['카오스']],
-    ['주간', '블러디 퀸', ['카오스']], ['주간', '벨룸', ['카오스']],
-    ['주간', '스우', ['노멀', '하드', '익스트림']], ['주간', '데미안', ['노멀', '하드']],
-    ['주간', '가디언 엔젤 슬라임', ['노멀', '카오스']],
-    ['주간', '루시드', ['이지', '노멀', '하드']],
-    ['주간', '윌', ['이지', '노멀', '하드']],
-    ['주간', '더스크', ['노멀', '카오스']],
-    ['주간', '진 힐라', ['노멀', '하드']],
-    ['주간', '듄켈', ['노멀', '하드']],
-    ['주간', '선택받은 세렌', ['노멀', '하드', '익스트림']],
-    ['주간', '감시자 칼로스', ['이지', '노멀', '카오스', '익스트림']],
-    ['주간', '최초의 대적자', ['이지', '노멀', '하드', '익스트림']],
-    ['주간', '카링', ['이지', '노멀', '하드', '익스트림']],
-    ['주간', '벨로나', ['이지', '노멀', '하드']],
-    ['주간', '찬란한 흉성', ['노멀', '하드']],
-    ['주간', '림보', ['노멀', '하드', '익스트림']],
-    ['주간', '발드릭스', ['노멀', '하드', '익스트림']],
-    ['주간', '유피테르', ['노멀', '하드']],
-    ['월간', '검은 마법사', ['하드', '익스트림']]
-  ];
+  
+const BOSS_GROUPS = [
+  ['주간', '스우', ['노멀', '하드', '익스트림']],
+  ['주간', '데미안', ['노멀', '하드']],
+  ['주간', '가디언 엔젤 슬라임', ['노멀', '카오스']],
+  ['주간', '루시드', ['이지', '노멀', '하드']],
+  ['주간', '윌', ['이지', '노멀', '하드']],
+  ['주간', '더스크', ['노멀', '카오스']],
+  ['주간', '진 힐라', ['노멀', '하드']],
+  ['주간', '듄켈', ['노멀', '하드']],
+  ['주간', '세렌', ['노멀', '하드', '익스트림']],
+  ['주간', '칼로스', ['이지', '노멀', '카오스', '익스트림']],
+  ['주간', '최초의 대적자', ['이지', '노멀', '하드', '익스트림']],
+  ['주간', '카링', ['이지', '노멀', '하드', '익스트림']],
+  ['주간', '벨로나', ['이지', '노멀', '하드']],
+  ['주간', '찬란한 흉성', ['노멀', '하드']],
+  ['주간', '림보', ['노멀', '하드', '익스트림']],
+  ['주간', '발드릭스', ['노멀', '하드', '익스트림']],
+  ['주간', '유피테르', ['노멀', '하드']],
+  ['월간', '검은 마법사', ['하드', '익스트림']]
+];
   const ALL_BOSSES = BOSS_GROUPS.flatMap(([period, boss, diffs]) => diffs.map(diff => ({ key: `${period}|${boss}|${diff}`, period, boss, diff, title: `${diff} ${boss}` })));
   const BOSS_BY_ID = new Map(ALL_BOSSES.map(x => [x.key, x]));
   const $ = id => document.getElementById(id);
@@ -54,16 +52,14 @@
   const optionalStat = value => value === '' || value == null || !Number.isFinite(Number(value)) ? null : Math.max(0, Number(value));
   const forceString = value => value == null ? '미조회' : Number(value).toLocaleString('ko-KR');
   // 보스 이미지는 레포지토리 내부 파일만 사용합니다. 외부 이미지 서버에 요청하지 않습니다.
-  const BOSS_ASSET_NAMES = {
-    '자쿰':'zakum', '매그너스':'magnus', '힐라':'hilla', '파풀라투스':'papulatus',
-    '피에르':'pierre', '반반':'vonbon', '블러디 퀸':'bloody-queen', '벨룸':'vellum',
-    '스우':'lotus', '데미안':'damien', '가디언 엔젤 슬라임':'guardian-angel-slime',
-    '루시드':'lucid', '윌':'will', '더스크':'dusk', '진 힐라':'verus-hilla',
-    '듄켈':'darknell', '선택받은 세렌':'seren', '감시자 칼로스':'kalos',
-    '최초의 대적자':'first-adversary', '카링':'kaling', '벨로나':'vellona',
-    '찬란한 흉성':'radiant-star', '림보':'limbo', '발드릭스':'baldrix',
-    '유피테르':'jupiter', '검은 마법사':'black-mage'
-  };
+  
+const BOSS_ASSET_NAMES = {
+  '스우':'lotus', '데미안':'damien', '가디언 엔젤 슬라임':'guardian-angel-slime',
+  '루시드':'lucid', '윌':'will', '더스크':'dusk', '진 힐라':'verus-hilla',
+  '듄켈':'darknell', '세렌':'seren', '칼로스':'kalos', '최초의 대적자':'first-adversary',
+  '카링':'kaling', '벨로나':'vellona', '찬란한 흉성':'radiant-star', '림보':'limbo',
+  '발드릭스':'baldrix', '유피테르':'jupiter', '검은 마법사':'black-mage'
+};
   const REAL_BOSS_IMAGES = new Set(window.MAPLE_BOSS_IMAGES || []);
   const bossCover = (boss, classname = 'boss-cover') => {
     const name = BOSS_ASSET_NAMES[boss];
@@ -72,7 +68,7 @@
   };
   const percentString = v => `${Number(v).toLocaleString('ko-KR', {maximumFractionDigits:2})}%`;
   const showTime = (percent, threshold) => { const seconds = Math.round(1200 * threshold / percent); return percent > 0 && Number.isFinite(seconds) ? `${Math.floor(seconds / 60).toLocaleString('ko-KR')}분 ${String(seconds % 60).padStart(2, '0')}초` : '—'; };
-  function defaultState() { const p = id(); return { version: 3, owners: [{ id: id(), name: '나', characters: [] }], parties: [{ id: p, name: '파티 1', capacity: 6, memberIds: [] }], selectedParty: p, bossKey: '주간|벨로나|노멀', level: 110 }; }
+  function defaultState() { const p = id(); return { version: 3, owners: [{ id: id(), name: '나', characters: [] }], parties: [{ id: p, name: '파티 1', capacity: 6, memberIds: [] }], selectedParty: p, bossKey: '주간|스우|노멀', level: 110 }; }
 
   function parseState(raw) {
     if (!raw || !Array.isArray(raw.owners) || !Array.isArray(raw.parties)) throw Error('유효한 캐릭터·파티 백업이 아닙니다.');
@@ -99,7 +95,7 @@
       memberIds: [...new Set((Array.isArray(p.memberIds) ? p.memberIds : []).filter(x => seen.has(x)))].slice(0, Math.min(6, Math.max(1, Math.round(Number(p.capacity) || 6))))
     }));
     if (!parties.length) parties.push({ id: id(), name: '파티 1', capacity: 6, memberIds: [] });
-    return { version: 3, owners, parties, selectedParty: parties.some(p => p.id === raw.selectedParty) ? raw.selectedParty : parties[0].id, bossKey: BOSS_BY_ID.has(raw.bossKey) ? raw.bossKey : '주간|벨로나|노멀', level: LEVELS.some(x => x.n === Number(raw.level)) ? Number(raw.level) : 110 };
+    return { version: 3, owners, parties, selectedParty: parties.some(p => p.id === raw.selectedParty) ? raw.selectedParty : parties[0].id, bossKey: BOSS_BY_ID.has(raw.bossKey) ? raw.bossKey : '주간|스우|노멀', level: LEVELS.some(x => x.n === Number(raw.level)) ? Number(raw.level) : 110 };
   }
   function migrateV02(raw) {
     return parseState({
@@ -128,8 +124,48 @@
   const currentParty = () => state.parties.find(p => p.id === state.selectedParty) || state.parties[0];
   const findCharacter = charId => { for (const owner of state.owners) { const character = owner.characters.find(c => c.id === charId); if (character) return { character, owner }; } return null; };
   const totalChars = () => state.owners.reduce((acc, o) => acc + o.characters.length, 0);
-  function save() { try { localStorage.setItem(STORE, JSON.stringify(state)); $('saveStatus').textContent = '브라우저에 저장'; } catch(e) { $('saveStatus').textContent = '저장 실패'; toast('저장 실패: 저장 공간을 확인하고 JSON으로 백업하세요.'); console.error(e); } }
+  function save() { try { localStorage.setItem(STORE, JSON.stringify(state)); } catch(e) { toast('저장에 실패했어요. 백업 후 저장 공간을 확인해 주세요.'); console.error(e); } }
   function toast(msg) { const el = $('toast'); el.textContent = msg; el.classList.add('show'); clearTimeout(toastTimer); toastTimer = setTimeout(() => el.classList.remove('show'), 3100); }
+
+  let pendingAction = null;
+  function openActionDialog({ title, message = '', inputLabel = '', value = '', confirmText = '확인', danger = false, onConfirm, onCancel }) {
+    const dialog = $('actionDialog');
+    if (dialog.open) dialog.close();
+    pendingAction = { onConfirm, onCancel, hasInput: Boolean(inputLabel) };
+    $('actionDialogTitle').textContent = title;
+    $('actionDialogMessage').textContent = message;
+    $('actionDialogMessage').hidden = !message;
+    $('actionDialogInputWrap').hidden = !inputLabel;
+    $('actionDialogInputLabel').textContent = inputLabel;
+    const input = $('actionDialogInput');
+    input.value = value;
+    input.required = Boolean(inputLabel);
+    input.maxLength = inputLabel === '캐릭터명' || inputLabel === '사용자 이름' ? 30 : 40;
+    $('actionDialogConfirmBtn').textContent = confirmText;
+    $('actionDialogConfirmBtn').classList.toggle('btn-danger', danger);
+    $('actionDialogConfirmBtn').classList.toggle('btn-primary', !danger);
+    dialog.showModal();
+    if (inputLabel) input.focus(); else $('actionDialogConfirmBtn').focus();
+  }
+  $('actionDialogForm').addEventListener('submit', e => {
+    e.preventDefault();
+    const action = pendingAction;
+    if (!action) return;
+    const value = $('actionDialogInput').value.trim();
+    if (action.hasInput && !value) {
+      $('actionDialogInput').focus();
+      return;
+    }
+    pendingAction = null;
+    $('actionDialog').close();
+    action.onConfirm?.(value);
+  });
+  $('actionDialog').addEventListener('close', () => {
+    const action = pendingAction;
+    pendingAction = null;
+    action?.onCancel?.();
+  });
+
   function avatar(ch) { return `<span class="avatar"><span class="placeholder" aria-hidden="true">✦</span>${ch.image ? `<img src="${html(httpsUrl(ch.image))}" loading="lazy" referrerpolicy="no-referrer" alt="${html(ch.name)} 캐릭터 이미지" onerror="this.remove()">` : ''}</span>`; }
   function charBrief(ch) { return [ch.job, ch.level ? `Lv.${ch.level}` : '', ch.world].filter(Boolean).map(html).join(' · ') || '직업·레벨 미등록'; }
   function renderOwnerSelect() { const prev = $('ownerSelect').value; $('ownerSelect').innerHTML = state.owners.map(o => `<option value="${html(o.id)}">${html(o.name)}</option>`).join(''); if (state.owners.some(o => o.id === prev)) $('ownerSelect').value = prev; }
@@ -200,21 +236,25 @@
       return `<button type="button" class="boss-tile ${selected?'active':''}" data-action="select-boss" data-boss="${html(boss)}" data-period="${html(period)}">${bossCover(boss)}<strong>${html(boss)}</strong>${entered?`<small>${entered}개 난이도 기록</small>`:'<small>배율 확인</small>'}</button>`;
     }).join(''):'<div class="empty">검색된 보스가 없어요.</div>';
   }
-  function renderEstimate() {
-    $('bossComparison').hidden=!selectedBossOpen;
-    $('bossChooseHint').hidden=selectedBossOpen;
-    renderBossTiles();
-    if (!selectedBossOpen) return;
-    const b=BOSS_BY_ID.get(state.bossKey); if(!b)return;
-    $('selectedBossVisual').innerHTML=`${bossCover(b.boss,'selected-boss-cover')}<div><small>${html(b.period)} 보스</small><h3>${html(b.boss)}</h3></div>`;
-    const group=BOSS_GROUPS.find(([period,boss])=>period===b.period&&boss===b.boss);
-    $('difficultyChips').innerHTML=group[2].map(diff=>`<button type="button" class="difficulty-chip ${diff===b.diff?'active':''}" data-action="select-difficulty" data-boss="${html(b.boss)}" data-period="${html(b.period)}" data-diff="${html(diff)}">${html(diff)}</button>`).join('');
-    const stats=detailsFor(currentParty());
-    $('ratioCoverage').textContent=`${stats.known.length} / ${stats.entries.length}`;
-    $('ratioTotal').textContent=stats.known.length?`${percentString(stats.total)}${stats.complete?'':' +'}`:'—';
-    $('memberRatios').innerHTML=stats.entries.length?stats.entries.map(x=>`<div class="member-ratio ${x.ratio===null?'missing':''}"><span>${html(x.character.name)} <small>${html(x.owner.name)}</small></span><strong>${x.ratio===null?'미입력':percentString(x.ratio)}</strong></div>`).join(''):'<div class="empty">파티에 캐릭터를 추가해 주세요.</div>';
-    $('timeRows').innerHTML=LEVELS.map(x=>`<div class="time-row ${x.n===state.level?'selected':''}"><span>${x.n}% · ${html(x.label)}</span><strong>${stats.complete?showTime(stats.total,x.n):'—'}</strong></div>`).join('');
-  }
+  
+function renderBossDetailDialog() {
+  const dialog = $('bossDetailDialog');
+  if (!dialog || !selectedBossOpen) return;
+  const b = BOSS_BY_ID.get(state.bossKey); if (!b) return;
+  $('dialogSelectedBossVisual').innerHTML = `${bossCover(b.boss,'selected-boss-cover')}<div><small>${html(b.period)} 보스</small><h3>${html(b.boss)}</h3></div>`;
+  const group = BOSS_GROUPS.find(([period,boss])=>period===b.period&&boss===b.boss);
+  $('dialogDifficultyChips').innerHTML = group[2].map(diff=>`<button type="button" class="difficulty-chip ${diff===b.diff?'active':''}" data-action="select-difficulty" data-boss="${html(b.boss)}" data-period="${html(b.period)}" data-diff="${html(diff)}">${html(diff)}</button>`).join('');
+  const stats = detailsFor(currentParty());
+  $('dialogRatioCoverage').textContent = `${stats.known.length} / ${stats.entries.length}`;
+  $('dialogRatioTotal').textContent = stats.known.length ? `${percentString(stats.total)}${stats.complete?'':' +'}` : '—';
+  $('dialogMemberRatios').innerHTML = stats.entries.length ? stats.entries.map(x=>`<div class="member-ratio ${x.ratio===null?'missing':''}"><span>${html(x.character.name)} <small>${html(x.owner.name)}</small></span><strong>${x.ratio===null?'미입력':percentString(x.ratio)}</strong></div>`).join('') : '<div class="empty">파티에 캐릭터를 추가해 주세요.</div>';
+  $('dialogTimeRows').innerHTML = LEVELS.map(x=>`<div class="time-row ${x.n===state.level?'selected':''}"><span>${x.n}% · ${html(x.label)}</span><strong>${stats.complete?showTime(stats.total,x.n):'—'}</strong></div>`).join('');
+}
+function renderEstimate() {
+  $('bossChooseHint').hidden = selectedBossOpen;
+  renderBossTiles();
+  renderBossDetailDialog();
+}
   function renderOverview() {
     $('partyOverview').hidden=!totalChars()||!selectedBossOpen;
     if(!selectedBossOpen)return;
@@ -261,21 +301,43 @@
       const c=found.character; $('editId').value=c.id; $('editName').value=c.name; $('editKind').value=c.kind; $('editJob').value=c.job; $('editLevel').value=c.level||''; $('editPower').value=c.combatPower||''; $('editArcane').value=c.arcaneForce??''; $('editAuthentic').value=c.authenticForce??''; $('editWorld').value=c.world; $('editImage').value=c.image; $('editDialog').showModal(); return;
     }
     if (action === 'delete-character') {
-      const found = findCharacter(key); if (!found || !confirm(`'${found.character.name}' 캐릭터와 저장된 보스 배율을 모두 삭제할까요?`)) return;
-      found.owner.characters=found.owner.characters.filter(c => c.id !== key);
-      state.parties.forEach(p => p.memberIds=p.memberIds.filter(c=>c!==key));
-      if (expandedId===key) expandedId=null; save(); renderAll(); return;
+      const found = findCharacter(key); if (!found) return;
+      openActionDialog({
+        title: '캐릭터 삭제',
+        message: `${found.character.name} 캐릭터와 저장된 보스 배율을 삭제할까요?`,
+        confirmText: '삭제', danger: true,
+        onConfirm: () => {
+          found.owner.characters = found.owner.characters.filter(c => c.id !== key);
+          state.parties.forEach(p => p.memberIds = p.memberIds.filter(c => c !== key));
+          if (expandedId === key) expandedId = null;
+          save(); renderAll();
+        }
+      });
+      return;
     }
     if (action === 'rename-owner') {
-      const o=state.owners.find(o=>o.id===key); if(!o)return;
-      const name=prompt('사용자 이름을 입력하세요.',o.name); if(name===null)return;
-      if(!short(name,30))return toast('이름을 입력하세요.'); o.name=short(name,30); save(); renderAll(); return;
+      const owner = state.owners.find(o => o.id === key); if (!owner) return;
+      openActionDialog({
+        title: '사용자 이름 변경', inputLabel: '사용자 이름', value: owner.name,
+        confirmText: '변경', onConfirm: name => { owner.name = short(name, 30); save(); renderAll(); }
+      });
+      return;
     }
     if (action === 'delete-owner') {
-      const o=state.owners.find(o=>o.id===key); if(!o)return;
-      if(state.owners.length===1)return toast('사용자는 최소 1명이 필요합니다.');
-      if(!confirm(`${o.name} 사용자와 캐릭터 ${o.characters.length}명 및 배율 기록을 삭제할까요?`))return;
-      const ids=new Set(o.characters.map(c=>c.id)); state.owners=state.owners.filter(a=>a.id!==key); state.parties.forEach(p=>p.memberIds=p.memberIds.filter(a=>!ids.has(a))); save(); renderAll(); return;
+      const owner = state.owners.find(o => o.id === key); if (!owner) return;
+      if (state.owners.length === 1) return toast('사용자는 최소 1명이 필요해요.');
+      openActionDialog({
+        title: '사용자 삭제',
+        message: `${owner.name} 사용자와 등록 캐릭터 ${owner.characters.length}명, 보스 배율 기록을 모두 삭제할까요?`,
+        confirmText: '삭제', danger: true,
+        onConfirm: () => {
+          const ids = new Set(owner.characters.map(c => c.id));
+          state.owners = state.owners.filter(o => o.id !== key);
+          state.parties.forEach(p => p.memberIds = p.memberIds.filter(c => !ids.has(c)));
+          save(); renderAll();
+        }
+      });
+      return;
     }
   }
 
@@ -322,17 +384,63 @@
     finally {button.disabled=false;button.textContent='넥슨 조회';}
   }
 
-  $('addOwnerBtn').addEventListener('click',()=>{const name=prompt('추가할 사용자 이름을 입력하세요.','사용자 2');if(name===null)return;const clean=short(name,30);if(!clean)return toast('이름을 입력하세요.');state.owners.push({id:id(),name:clean,characters:[]});save();renderAll();$('ownerSelect').value=state.owners.at(-1).id;});
+  $('addOwnerBtn').addEventListener('click', () => {
+    openActionDialog({
+      title: '사용자 추가', inputLabel: '사용자 이름', value: `사용자 ${state.owners.length + 1}`,
+      confirmText: '추가', onConfirm: name => {
+        const owner = {id:id(), name:short(name, 30), characters:[]};
+        state.owners.push(owner); save(); renderAll(); $('ownerSelect').value = owner.id;
+      }
+    });
+  });
   $('lookupBtn').addEventListener('click',lookup);
   $('nicknameInput').addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault(); lookup();}});
-  $('manualAddBtn').addEventListener('click',()=>addCharacter({name:$('nicknameInput').value}));
+  $('manualAddBtn').addEventListener('click', () => {
+    openActionDialog({
+      title: '캐릭터 직접 추가', message: '현재 선택된 사용자의 보관함에 등록해요.',
+      inputLabel: '캐릭터명', value: $('nicknameInput').value.trim(),
+      confirmText: '등록', onConfirm: name => addCharacter({name})
+    });
+  });
   $('rosterSearch').addEventListener('input',e=>{rosterFilter=e.target.value;renderRoster();});
-  $('addPartyBtn').addEventListener('click',()=>{const p={id:id(),name:`파티 ${state.parties.length+1}`,capacity:6,memberIds:[]};state.parties.push(p);state.selectedParty=p.id;save();renderParty();updateMath();});
+  $('addPartyBtn').addEventListener('click', () => {
+    openActionDialog({
+      title: '새 파티 만들기', inputLabel: '파티 이름', value: `파티 ${state.parties.length + 1}`,
+      confirmText: '만들기', onConfirm: name => {
+        const party = {id:id(),name:short(name,40),capacity:6,memberIds:[]};
+        state.parties.push(party); state.selectedParty = party.id;
+        save(); renderParty(); updateMath();
+      }
+    });
+  });
   $('partySelect').addEventListener('change',e=>{state.selectedParty=e.target.value;save();renderParty();updateMath();});
-  $('partyCapacity').addEventListener('change',e=>{const p=currentParty(),next=Number(e.target.value);if(p.memberIds.length>next&&!confirm(`파티 인원을 ${next}명으로 줄이면 마지막 ${p.memberIds.length-next}명은 편성에서 제외됩니다. 계속할까요?`)){$('partyCapacity').value=p.capacity;return;}p.capacity=next;p.memberIds=p.memberIds.slice(0,next);save();renderParty();updateMath();});
-  $('renamePartyBtn').addEventListener('click',()=>{const p=currentParty(),name=prompt('파티 이름',p.name);if(name===null)return;if(!short(name))return toast('파티 이름을 입력하세요.');p.name=short(name,40);save();renderParty();renderOverview();});
-  $('clearPartyBtn').addEventListener('click',()=>{const p=currentParty();if(!p.memberIds.length)return;if(!confirm('현재 파티의 편성을 비울까요? 캐릭터별 배율 기록은 유지됩니다.'))return;p.memberIds=[];save();renderParty();updateMath();});
-  $('deletePartyBtn').addEventListener('click',()=>{if(state.parties.length<=1)return toast('파티는 최소 1개가 필요합니다.');const p=currentParty();if(!confirm(`${p.name}를 삭제할까요?`))return;state.parties=state.parties.filter(x=>x.id!==p.id);state.selectedParty=state.parties[0].id;save();renderParty();updateMath();});
+  $('partyCapacity').addEventListener('change', e => {
+    const party = currentParty(), next = Number(e.target.value);
+    const apply = () => { party.capacity=next; party.memberIds=party.memberIds.slice(0,next); save(); renderParty(); updateMath(); };
+    if (party.memberIds.length <= next) return apply();
+    openActionDialog({
+      title: '파티 인원 변경',
+      message: `${next}명으로 줄이면 마지막 ${party.memberIds.length - next}명이 파티에서 제외돼요.`,
+      confirmText: '변경', onConfirm: apply,
+      onCancel: () => { $('partyCapacity').value = String(party.capacity); }
+    });
+  });
+  $('renamePartyBtn').addEventListener('click', () => {
+    const party = currentParty();
+    openActionDialog({title:'파티 이름 변경',inputLabel:'파티 이름',value:party.name,confirmText:'변경',
+      onConfirm: name => { party.name=short(name,40); save(); renderParty(); renderOverview(); }});
+  });
+  $('clearPartyBtn').addEventListener('click', () => {
+    const party = currentParty(); if (!party.memberIds.length) return;
+    openActionDialog({title:'파티 비우기',message:'파티원만 제외해요. 캐릭터와 보스 배율 기록은 유지돼요.',confirmText:'비우기',danger:true,
+      onConfirm: () => { party.memberIds=[]; save(); renderParty(); updateMath(); }});
+  });
+  $('deletePartyBtn').addEventListener('click', () => {
+    if (state.parties.length <= 1) return toast('파티는 최소 1개가 필요해요.');
+    const party = currentParty();
+    openActionDialog({title:'파티 삭제',message:`${party.name} 파티를 삭제할까요? 캐릭터별 배율 기록은 유지돼요.`,confirmText:'삭제',danger:true,
+      onConfirm: () => {state.parties=state.parties.filter(p=>p.id!==party.id);state.selectedParty=state.parties[0].id;save();renderParty();updateMath();}});
+  });
 
   $('editForm').addEventListener('submit',e=>{e.preventDefault();const f=findCharacter($('editId').value);if(!f)return;const c=f.character;const name=short($('editName').value,30);if(!name)return toast('닉네임을 입력하세요.');if(state.owners.some(o=>o.characters.some(x=>x.id!==c.id&&x.name===name)))return toast('중복된 캐릭터명이 있습니다.');const imageRaw=$('editImage').value.trim();if(imageRaw&&!httpsUrl(imageRaw))return toast('캐릭터 이미지 주소는 HTTPS만 지원합니다.');Object.assign(c,{name,kind:$('editKind').value,job:short($('editJob').value,40),world:short($('editWorld').value,40),level:Number($('editLevel').value)||0,combatPower:Number($('editPower').value)||0,arcaneForce:optionalStat($('editArcane').value),authenticForce:optionalStat($('editAuthentic').value),image:httpsUrl(imageRaw)});save();$('editDialog').close();renderRoster();renderParty();updateMath();});
   document.addEventListener('click',e=>{
@@ -342,7 +450,7 @@
     if(action==='show-overview'){if(!selectedBossOpen)return toast('보스를 먼저 선택하세요.');$('overviewDialog').showModal();return;}
     if(action==='period'){charPeriod.set(key,target.dataset.period);renderRatioDialogBody();return;}
     if(action==='compare-period'){comparePeriod=target.dataset.period;selectedBossOpen=false;renderEstimate();renderOverview();return;}
-    if(action==='close-compare'){selectedBossOpen=false;updateMath();return;}
+    if(action==='close-compare'){selectedBossOpen=false;$('bossDetailDialog')?.close();updateMath();return;}
     if(action==='select-boss'){
       const {boss,period}=target.dataset;
       const g=BOSS_GROUPS.find(([p,b])=>p===period&&b===boss); if(!g)return;
@@ -355,9 +463,9 @@
         const diff=(current?.boss===boss&&current.period===period && currentParty().memberIds.some(cid=>valuePercent(findCharacter(cid)?.character.ratios[`${period}|${boss}|${current.diff}`])!==null)) ? current.diff : (preferred?.records ? preferred.diff : g[2][0]);
         state.bossKey=`${period}|${boss}|${diff}`; selectedBossOpen=true; save();
       }
-      updateMath();return;
+      updateMath(); if (!$('bossDetailDialog').open) $('bossDetailDialog').showModal(); return;
     }
-    if(action==='select-difficulty'){state.bossKey=`${target.dataset.period}|${target.dataset.boss}|${target.dataset.diff}`;save();updateMath();return;}
+    if(action==='select-difficulty'){state.bossKey=`${target.dataset.period}|${target.dataset.boss}|${target.dataset.diff}`;save();updateMath(); if (!$('bossDetailDialog').open) $('bossDetailDialog').showModal(); return;}
     if(action==='store-lookup'&&lookupResult){addCharacter(lookupResult);return;}
     if(action==='cancel-lookup'){$('lookupPreview').hidden=true;lookupResult=null;return;}
     manage(action,key);
@@ -425,6 +533,7 @@
   });
   $('compareBossFilter').addEventListener('input',renderBossTiles);
   $('ratioDialog').addEventListener('close',()=>{activeRatioCharId=null;renderRoster();});
+  $('bossDetailDialog').addEventListener('close',()=>{selectedBossOpen=false;renderEstimate();renderOverview();});
   document.addEventListener('input',e=>{const el=e.target.closest('[data-boss-filter]');if(!el)return;const q=el.value.toLocaleLowerCase().trim();const editor=el.closest('.ratio-editor');editor.querySelectorAll('[data-boss-group]').forEach(group=>{group.hidden=!group.dataset.bossGroup.toLocaleLowerCase().includes(q);});});
   let draggingCharId = null;
   $('roster').addEventListener('dragstart',e=>{const card=e.target.closest('[data-drag-char]');if(!card)return;draggingCharId=card.dataset.dragChar;e.dataTransfer.effectAllowed='move';e.dataTransfer.setData('text/plain',card.dataset.dragChar);card.classList.add('dragging');});
@@ -434,7 +543,38 @@
   $('partySlots').addEventListener('drop',e=>{const slot=e.target.closest('[data-drop-slot]');if(!slot)return;e.preventDefault();$('partySlots').querySelectorAll('.over').forEach(el=>el.classList.remove('over'));const charId=e.dataTransfer.getData('text/plain') || draggingCharId; if(findCharacter(charId))addMember(charId,Number(slot.dataset.dropSlot)); draggingCharId=null;});
   $('backupBtn').addEventListener('click',()=>{const blob=new Blob([JSON.stringify({ ...state, proxyUrl: undefined, exportedAt:new Date().toISOString() },null,2)],{type:'application/json'});const u=URL.createObjectURL(blob);const a=document.createElement('a');a.href=u;a.download=`maple-party-backup-${new Date().toISOString().slice(0,10)}.json`;document.body.append(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(u),1000);});
   $('restoreBtn').addEventListener('click',()=>$('importFile').click());
-  $('importFile').addEventListener('change',async e=>{const f=e.target.files?.[0];if(!f)return;if(f.size>3_000_000){toast('3MB 이하 JSON 백업을 선택하세요.');e.target.value='';return;}try{const parsed=parseState(JSON.parse(await f.text()));if(!confirm('현재 브라우저에 저장된 데이터를 백업 파일로 교체할까요?'))return;state=parsed;expandedId=null;selectedBossOpen=false;save();renderAll();toast('백업 데이터를 복원했습니다.');}catch(err){toast(`복원 실패: ${err.message}`);}finally{e.target.value='';}});
+  $('importFile').addEventListener('change', async e => {
+    const file = e.target.files?.[0]; if (!file) return;
+    try {
+      if (file.size > 3_000_000) throw Error('3MB 이하 JSON 백업을 선택해 주세요.');
+      const parsed = parseState(JSON.parse(await file.text()));
+      openActionDialog({
+        title: '백업 복원', message: '지금 저장된 데이터가 백업 파일 내용으로 교체돼요.',
+        confirmText: '복원', danger: true,
+        onConfirm: () => {
+          state = parsed; expandedId = null; selectedBossOpen = false;
+          save(); renderAll(); toast('백업을 복원했어요.');
+        }
+      });
+    } catch (err) { toast(`복원 실패: ${err.message}`); }
+    finally { e.target.value=''; }
+  });
+  $('resetBtn').addEventListener('click', () => {
+    openActionDialog({
+      title: '전체 데이터 초기화',
+      message: '등록한 사용자, 캐릭터, 보스 배율, 파티 구성이 모두 삭제돼요. 되돌릴 수 없으니 필요한 데이터는 먼저 백업해 주세요.',
+      confirmText: '전체 초기화', danger: true,
+      onConfirm: () => {
+        try { localStorage.removeItem(STORE); localStorage.removeItem(OLD_STORE); }
+        catch (e) { console.error(e); return toast('초기화하지 못했어요. 저장 공간을 확인해 주세요.'); }
+        state = defaultState(); expandedId=null; selectedBossOpen=false; activeRatioCharId=null;
+        charPeriod.clear(); draftRatioSelections.clear(); lookupResult=null; rosterFilter=''; comparePeriod='주간';
+        $('nicknameInput').value=''; $('rosterSearch').value=''; $('compareBossFilter').value='';
+        $('lookupPreview').hidden=true; $('lookupPreview').innerHTML='';
+        save(); renderAll(); toast('전체 데이터를 초기화했어요.');
+      }
+    });
+  });
 
   renderAll();if(migrated){save();toast('이전 버전의 캐릭터·파티를 가져왔습니다. 이전 파티별 배율은 개인 배율로 옮기지 않았습니다.');}
 })();

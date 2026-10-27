@@ -1,1 +1,1 @@
-window.MAPLE_BOSS_IMAGES = [];
+window.MAPLE_BOSS_IMAGES = ["baldrix", "black-mage", "damien", "darknell", "dusk", "first-adversary", "guardian-angel-slime", "jupiter", "kaling", "kalos", "limbo", "lotus", "lucid", "radiant-star", "seren", "vellona", "verus-hilla", "will"];

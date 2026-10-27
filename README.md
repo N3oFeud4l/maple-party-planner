@@ -1,4 +1,4 @@
-# 메이플 파티 플래너 v0.5.0
+# 메이플 파티 플래너 v0.6.1
 
 ## 설치와 배포
 
@@ -28,3 +28,12 @@
 5. F12 → Network에서 브라우저에 넥슨 API 키가 전달되지 않는지 확인.
 
 Data based on NEXON Open API · 비공식 팬 프로젝트
+
+
+## v0.6.1 UI 변경
+- 업로드된 메이플 버섯 이미지 `assets/branding/mushroom-logo.jpg`를 상단 로고에 적용
+- 상단 저장 상태 표시와 불필요한 기술적 안내 문구 정리
+- 사용자/캐릭터/파티 추가·수정·삭제, 인원 축소, JSON 복원 확인을 디자인 팝업으로 통일
+- 상단 **초기화** 버튼 추가: `maple_party_planner_web_v03`, 구버전 `maple_party_planner_web_v02` 데이터를 확인 후 초기화
+- 넥슨 API 프록시 주소 및 Worker 파일은 변경 없음
+- GitHub Pages/Cloudflare Pages 주소가 같으면 기존 `localStorage` 데이터 유지

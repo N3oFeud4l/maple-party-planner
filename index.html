@@ -12,17 +12,17 @@
 <body>
   <div class="app-shell">
     <header class="topbar">
-      <div class="brand-icon" aria-hidden="true"><img src="./assets/branding/mushroom.svg" alt=""></div>
+      <div class="brand-icon" aria-hidden="true"><img src="./assets/branding/mushroom-logo.jpg" alt=""></div>
       <div class="brand-copy"><strong>메이플 파티 플래너</strong><span>캐릭터별 보스 배율 · 파티 편성</span></div>
-      <span class="top-pill"><span class="green-dot"></span><span id="saveStatus">브라우저에 저장</span></span>
       <button type="button" class="btn btn-quiet" id="backupBtn" title="JSON 파일로 백업"><span>⇩</span> 백업</button>
       <button type="button" class="btn btn-quiet" id="restoreBtn" title="백업한 JSON 파일 불러오기"><span>⇧</span> 복원</button>
+      <button type="button" class="btn btn-reset" id="resetBtn" title="모든 캐릭터, 파티, 배율 데이터를 초기화"><span>↺</span> 초기화</button>
       
       <input id="importFile" type="file" accept=".json,application/json" hidden>
     </header>
 
     <div class="intro">
-      <div><div class="eyebrow">PARTY BUILDER <span>v0.5.0</span></div><h1>우리 파티, 한눈에</h1><p>캐릭터를 선택하고 배율을 기록해요. 파티별 예상 시간까지 한눈에.</p></div>
+      <div><h1>우리 파티, 한눈에</h1></div>
     </div>
 
     <main class="main-grid no-party" id="mainGrid">
@@ -39,7 +39,7 @@
           <button type="button" class="btn btn-outline" id="manualAddBtn">직접 추가</button>
         </div>
         <div id="lookupPreview" class="lookup-preview" hidden></div>
-        <div class="toolbar-secondary"><div class="muted" id="rosterHint">닉네임으로 캐릭터를 등록하거나 저장된 캐릭터를 관리하세요.</div><div class="search-field mini-search"><span>⌕</span><input id="rosterSearch" type="search" placeholder="등록 캐릭터 필터" aria-label="등록 캐릭터 필터"></div></div>
+        <div class="toolbar-secondary"><div class="muted" id="rosterHint">등록된 캐릭터</div><div class="search-field mini-search"><span>⌕</span><input id="rosterSearch" type="search" placeholder="등록 캐릭터 필터" aria-label="등록 캐릭터 필터"></div></div>
         <div id="roster" class="roster"></div>
       </section>
 
@@ -52,33 +52,31 @@
           </div>
           <div class="party-actions"><button id="renamePartyBtn" class="inline-action">이름 변경</button><button id="clearPartyBtn" class="inline-action">파티 비우기</button><button id="deletePartyBtn" class="inline-action danger-text">파티 삭제</button></div>
           <div id="partySlots" class="party-slots"></div>
-          <div class="helper">캐릭터를 끌어 놓거나 카드의 <b>+ 파티</b> 버튼으로 추가하세요. 같은 사용자는 한 캐릭터만 참여할 수 있어요.</div>
+          <div class="helper">드래그하거나 + 파티로 추가 · 사용자별 1캐릭터</div>
         </section>
         <section class="panel estimate-panel" aria-labelledby="estimateTitle">
           <div class="panel-heading"><div class="section-heading"><span class="section-n">03</span><h2 id="estimateTitle">보스 배율 비교</h2></div><button class="text-button" type="button" data-action="show-overview">파티 비교 보기</button></div>
           <div class="boss-board-controls"><div class="tabs" id="comparePeriodTabs"><button type="button" class="tab active" data-action="compare-period" data-period="주간">주간</button><button type="button" class="tab" data-action="compare-period" data-period="월간">월간</button></div><input id="compareBossFilter" class="boss-filter" type="search" placeholder="보스 검색" aria-label="비교할 보스 찾기"></div>
-          <div id="bossTiles" class="boss-tiles"></div>
-          <div id="bossComparison" hidden>
-            <div class="compare-head"><div id="selectedBossVisual"></div><button class="icon-button" type="button" data-action="close-compare" aria-label="보스 결과 닫기">✕</button></div>
-            <div id="difficultyChips" class="difficulty-chips"></div>
-            <div class="mini-stats"><div><span>배율 입력 현황</span><strong id="ratioCoverage">0 / 0</strong></div><div><span>개인 배율 참고 합계</span><strong id="ratioTotal">—</strong></div></div>
-            <div id="memberRatios" class="member-ratios"></div>
-            <div class="divider"></div>
-            <div class="time-heading"><strong>예상 클리어 시간</strong><span>20분 기준</span></div>
-            <div id="timeRows" class="time-rows"></div>
-            <p class="warning-note">개인 배율의 단순 합계에 따른 참고 시간입니다. 실제 파티 배율이나 클리어 시간을 보장하지 않으며 직업 시너지·보스 패턴은 반영되지 않습니다.</p>
-          </div>
-          <div id="bossChooseHint" class="boss-choose-hint">보스 카드를 누르면 파티 배율과 예상 시간이 펼쳐져요.</div>
+          <div class="boss-scroll-wrap"><div id="bossTiles" class="boss-tiles"></div></div>
+          <div id="bossChooseHint" class="boss-choose-hint">보스를 선택하면 배율과 예상 시간이 표시돼요.</div>
           <select id="bossSelect" hidden aria-label="선택된 보스 난이도"></select>
         </section>
       </aside>
     </main>
     <dialog id="overviewDialog" class="modal overview-dialog">    <section class="panel overview-panel" id="partyOverview" aria-labelledby="overviewTitle" hidden><div class="panel-heading"><div class="section-heading"><span class="section-n">04</span><h2 id="overviewTitle">파티 조합 비교</h2></div><span class="muted">선택한 보스 기준</span></div><div id="overviewTable"></div></section>
 <button class="btn btn-primary" type="button" data-close="overviewDialog">닫기</button></dialog>
-    <footer>메이플스토리 캐릭터 정보: NEXON Open API · 개인 배율은 사용자가 직접 기록 · 저장 위치: 이 브라우저의 localStorage</footer>
+    <footer>Data based on NEXON Open API</footer>
   </div>
   <div class="toast" id="toast" role="status" aria-live="polite"></div>
   <dialog id="editDialog" class="modal"><form id="editForm"><div class="dialog-top"><h2>캐릭터 정보 수정</h2><button type="button" class="icon-button" data-close="editDialog" aria-label="닫기">✕</button></div><input type="hidden" id="editId"><div class="form-grid"><label class="stacked-label">캐릭터명<input id="editName" required maxlength="30"></label><label class="stacked-label">본캐/부캐<select id="editKind"><option value="main">본캐</option><option value="alt">부캐</option></select></label><label class="stacked-label">직업<input id="editJob" maxlength="40"></label><label class="stacked-label">레벨<input id="editLevel" type="number" min="0" max="1000"></label><label class="stacked-label">전투력<input id="editPower" type="number" min="0" step="1" placeholder="예: 25000000"></label><label class="stacked-label">월드<input id="editWorld" maxlength="40"></label><label class="stacked-label">아케인포스<input id="editArcane" type="number" min="0" step="1" placeholder="미조회 시 공란"></label><label class="stacked-label">어센틱포스<input id="editAuthentic" type="number" min="0" step="1" placeholder="미조회 시 공란"></label><label class="stacked-label full">캐릭터 이미지 HTTPS URL<input id="editImage" type="url" placeholder="https://..."></label></div><div class="modal-footer"><button type="button" class="btn btn-quiet" data-close="editDialog">취소</button><button class="btn btn-primary" type="submit">저장</button></div></form></dialog>
+    <dialog id="bossDetailDialog" class="modal boss-detail-dialog" aria-labelledby="bossDetailTitle"><div class="dialog-top"><div><div class="eyebrow">BOSS DETAIL</div><h2 id="bossDetailTitle">보스 배율 상세</h2></div><button type="button" class="icon-button" data-close="bossDetailDialog" aria-label="닫기">✕</button></div><div class="boss-detail-head"><div id="dialogSelectedBossVisual"></div></div><div id="dialogDifficultyChips" class="difficulty-chips"></div><div class="mini-stats"><div><span>배율 입력 현황</span><strong id="dialogRatioCoverage">0 / 0</strong></div><div><span>개인 배율 참고 합계</span><strong id="dialogRatioTotal">—</strong></div></div><div id="dialogMemberRatios" class="member-ratios dialog-member-ratios"></div><div class="divider"></div><div class="time-heading"><strong>예상 클리어 시간</strong><span>20분 기준</span></div><div id="dialogTimeRows" class="time-rows"></div><p class="warning-note">개인 배율의 단순 합계에 따른 참고 시간입니다. 실제 파티 배율이나 클리어 시간을 보장하지 않으며 직업 시너지·보스 패턴은 반영되지 않습니다.</p><div class="modal-footer"><button class="btn btn-primary" type="button" data-close="bossDetailDialog">닫기</button></div></dialog>
+  <dialog id="actionDialog" class="modal action-dialog" aria-labelledby="actionDialogTitle">
+    <form id="actionDialogForm">
+      <div class="dialog-top"><div><h2 id="actionDialogTitle">확인</h2><p id="actionDialogMessage" class="action-message"></p></div><button class="icon-button" type="button" data-close="actionDialog" aria-label="닫기">✕</button></div>
+      <label id="actionDialogInputWrap" class="stacked-label action-input-wrap" hidden><span id="actionDialogInputLabel">이름</span><input id="actionDialogInput" type="text" maxlength="40" autocomplete="off" placeholder="이름 입력"></label>
+      <div class="modal-footer"><button type="button" class="btn btn-quiet" data-close="actionDialog">취소</button><button id="actionDialogConfirmBtn" type="submit" class="btn btn-primary">확인</button></div>
+    </form>
+  </dialog>
   <dialog id="ratioDialog" class="modal ratio-dialog" aria-labelledby="ratioDialogTitle"><div class="dialog-top"><div><div class="eyebrow">CHARACTER &amp; BOSS</div><h2 id="ratioDialogTitle">보스 배율 관리</h2></div><button type="button" class="icon-button dialog-close" data-close="ratioDialog" aria-label="닫기">✕</button></div><div id="ratioCharacterInfo" class="ratio-character-info"></div><div id="ratioDialogBody" class="ratio-dialog-body"></div><div class="modal-footer"><button type="button" class="btn btn-primary" data-close="ratioDialog">완료</button></div></dialog>
 </body>
 </html>
