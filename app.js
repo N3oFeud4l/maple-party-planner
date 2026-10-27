@@ -50,7 +50,6 @@ const BOSS_GROUPS = [
     return parts.join(' ');
   };
   const optionalStat = value => value === '' || value == null || !Number.isFinite(Number(value)) ? null : Math.max(0, Number(value));
-  const forceString = value => value == null ? '미조회' : Number(value).toLocaleString('ko-KR');
   // 보스 이미지는 레포지토리 내부 파일만 사용합니다. 외부 이미지 서버에 요청하지 않습니다.
   
 const BOSS_ASSET_NAMES = {
@@ -60,11 +59,9 @@ const BOSS_ASSET_NAMES = {
   '카링':'kaling', '벨로나':'vellona', '찬란한 흉성':'radiant-star', '림보':'limbo',
   '발드릭스':'baldrix', '유피테르':'jupiter', '검은 마법사':'black-mage'
 };
-  const REAL_BOSS_IMAGES = new Set(window.MAPLE_BOSS_IMAGES || []);
   const bossCover = (boss, classname = 'boss-cover') => {
     const name = BOSS_ASSET_NAMES[boss];
-    const base = name ? `./assets/bosses/${name}` : './assets/bosses/default';
-    return `<span class="${classname}"><img src="${base}.${REAL_BOSS_IMAGES.has(name) ? 'png' : 'svg'}" loading="lazy" alt="${html(boss)} 이미지"></span>`;
+    return `<span class="${classname}"><img src="./assets/bosses/${name}.png" loading="lazy" alt="${html(boss)} 이미지" onerror="this.hidden=true"></span>`;
   };
   const percentString = v => `${Number(v).toLocaleString('ko-KR', {maximumFractionDigits:2})}%`;
   const showTime = (percent, threshold) => { const seconds = Math.round(1200 * threshold / percent); return percent > 0 && Number.isFinite(seconds) ? `${Math.floor(seconds / 60).toLocaleString('ko-KR')}분 ${String(seconds % 60).padStart(2, '0')}초` : '—'; };
@@ -188,7 +185,7 @@ const BOSS_ASSET_NAMES = {
       }).join('')}</div><p class="hint-small">난이도를 체크하면 배율 입력칸이 열립니다. 입력값은 Enter 또는 포커스 이동 시 저장됩니다.</p>
     </div>`;
   }
-  function charPowers(ch) { return `<div class="char-stats"><span class="stat-chip stat-power"><small>전투력</small><b title="${Math.round(Number(ch.combatPower)||0).toLocaleString('ko-KR')}">${powerString(ch.combatPower)}</b></span><span class="stat-chip"><small>아케인포스</small><b>${forceString(ch.arcaneForce)}</b></span><span class="stat-chip"><small>어센틱포스</small><b>${forceString(ch.authenticForce)}</b></span></div>${ch.statStatus === 'unavailable' ? '<span class="stat-warning">능력치 조회 실패 · 새로고침 권장</span>' : ''}`; }
+  function charPowers(ch) { return `<div class="char-stats"><span class="stat-chip stat-power"><small>전투력</small><b title="${Math.round(Number(ch.combatPower)||0).toLocaleString('ko-KR')}">${powerString(ch.combatPower)}</b></span></div>`; }
   function openRatioDialog(charId) {
     const found = findCharacter(charId); if (!found) return;
     activeRatioCharId = charId;
@@ -213,6 +210,8 @@ const BOSS_ASSET_NAMES = {
   function renderParty() {
     $('partySelect').innerHTML = state.parties.map(p => `<option value="${html(p.id)}">${html(p.name)}</option>`).join('');
     const party = currentParty(); $('partySelect').value = party.id; $('partyCapacity').value = String(party.capacity);
+    $('partyCurrentName').textContent = party.name;
+    $('partyList').innerHTML = state.parties.map(p => `<button type="button" class="party-choice ${p.id === party.id ? 'active' : ''}" data-action="switch-party" data-id="${html(p.id)}" aria-pressed="${p.id === party.id}"><span class="party-choice-text">${html(p.name)}</span><small>${p.memberIds.length}/${p.capacity}명</small>${p.id === party.id ? '<span class="party-check" aria-hidden="true">✓</span>' : ''}</button>`).join('');
     $('partySlots').innerHTML = Array.from({length:party.capacity}, (_, i) => {
       const found = findCharacter(party.memberIds[i]);
       return `<div class="slot ${found ? 'filled' : ''}" data-drop-slot="${i}"><span class="slot-number">${i+1}</span>${found ? `${avatar(found.character)}<div class="slot-details"><strong>${html(found.character.name)}</strong><small>${html(found.owner.name)} · ${powerString(found.character.combatPower)}</small></div><button class="slot-remove" type="button" aria-label="${html(found.character.name)} 파티 제외" data-action="remove-member" data-id="${html(found.character.id)}">✕</button>` : '<span class="slot-plus">＋</span><div class="slot-placeholder">캐릭터 배치</div>'}</div>`;
@@ -298,7 +297,7 @@ function renderEstimate() {
     if (action === 'period') { return; }
     if (action === 'edit-character') {
       const found = findCharacter(key); if (!found) return;
-      const c=found.character; $('editId').value=c.id; $('editName').value=c.name; $('editKind').value=c.kind; $('editJob').value=c.job; $('editLevel').value=c.level||''; $('editPower').value=c.combatPower||''; $('editArcane').value=c.arcaneForce??''; $('editAuthentic').value=c.authenticForce??''; $('editWorld').value=c.world; $('editImage').value=c.image; $('editDialog').showModal(); return;
+      const c=found.character; $('editId').value=c.id; $('editName').value=c.name; $('editKind').value=c.kind; $('editJob').value=c.job; $('editLevel').value=c.level||''; $('editPower').value=c.combatPower||''; $('editWorld').value=c.world; $('editImage').value=c.image; $('editDialog').showModal(); return;
     }
     if (action === 'delete-character') {
       const found = findCharacter(key); if (!found) return;
@@ -369,7 +368,7 @@ function renderEstimate() {
       // 기존 사용자, 본캐/부캐, 개별 보스 배율, 파티 편성을 유지합니다.
       Object.assign(found.character, fresh);
       save(); renderAll();
-      toast(fresh.statStatus === 'unavailable' ? '캐릭터 기본 정보는 갱신됐지만 넥슨 능력치 조회가 실패했습니다.' : `${fresh.name} 캐릭터 정보를 갱신했습니다.`);
+      toast(`${fresh.name} 캐릭터 정보를 갱신했습니다.`);
     } catch (e) { toast(`갱신 실패: ${e.name === 'AbortError' ? '요청 시간 초과' : e.message}`); }
   }
   async function lookup() {
@@ -442,11 +441,17 @@ function renderEstimate() {
       onConfirm: () => {state.parties=state.parties.filter(p=>p.id!==party.id);state.selectedParty=state.parties[0].id;save();renderParty();updateMath();}});
   });
 
-  $('editForm').addEventListener('submit',e=>{e.preventDefault();const f=findCharacter($('editId').value);if(!f)return;const c=f.character;const name=short($('editName').value,30);if(!name)return toast('닉네임을 입력하세요.');if(state.owners.some(o=>o.characters.some(x=>x.id!==c.id&&x.name===name)))return toast('중복된 캐릭터명이 있습니다.');const imageRaw=$('editImage').value.trim();if(imageRaw&&!httpsUrl(imageRaw))return toast('캐릭터 이미지 주소는 HTTPS만 지원합니다.');Object.assign(c,{name,kind:$('editKind').value,job:short($('editJob').value,40),world:short($('editWorld').value,40),level:Number($('editLevel').value)||0,combatPower:Number($('editPower').value)||0,arcaneForce:optionalStat($('editArcane').value),authenticForce:optionalStat($('editAuthentic').value),image:httpsUrl(imageRaw)});save();$('editDialog').close();renderRoster();renderParty();updateMath();});
+  $('editForm').addEventListener('submit',e=>{e.preventDefault();const f=findCharacter($('editId').value);if(!f)return;const c=f.character;const name=short($('editName').value,30);if(!name)return toast('닉네임을 입력하세요.');if(state.owners.some(o=>o.characters.some(x=>x.id!==c.id&&x.name===name)))return toast('중복된 캐릭터명이 있습니다.');const imageRaw=$('editImage').value.trim();if(imageRaw&&!httpsUrl(imageRaw))return toast('캐릭터 이미지 주소는 HTTPS만 지원합니다.');Object.assign(c,{name,kind:$('editKind').value,job:short($('editJob').value,40),world:short($('editWorld').value,40),level:Number($('editLevel').value)||0,combatPower:Number($('editPower').value)||0,image:httpsUrl(imageRaw)});save();$('editDialog').close();renderRoster();renderParty();updateMath();});
   document.addEventListener('click',e=>{
     const close=e.target.closest('[data-close]');if(close){$(close.dataset.close)?.close();return;}
     const target=e.target.closest('[data-action]');if(!target)return;
     const action=target.dataset.action,key=target.dataset.id;
+    if(action==='switch-party'){
+      if (!state.parties.some(p => p.id === key)) return;
+      state.selectedParty = key;
+      $('partySwitcher').open = false;
+      save(); renderParty(); updateMath(); return;
+    }
     if(action==='show-overview'){if(!selectedBossOpen)return toast('보스를 먼저 선택하세요.');$('overviewDialog').showModal();return;}
     if(action==='period'){charPeriod.set(key,target.dataset.period);renderRatioDialogBody();return;}
     if(action==='compare-period'){comparePeriod=target.dataset.period;selectedBossOpen=false;renderEstimate();renderOverview();return;}

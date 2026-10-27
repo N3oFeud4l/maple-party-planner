@@ -307,3 +307,138 @@ h1{font-size:30px;line-height:1.32;letter-spacing:-1.4px;font-weight:850}h2{font
   .topbar .btn-reset{padding:0 10px}
   .action-dialog{margin:auto 0 0;width:100vw;max-width:none;border-radius:26px 26px 0 0;padding:26px 20px max(20px,env(safe-area-inset-bottom))}
 }
+
+/* v0.6.2 · balanced dashboard, compact library, expandable party list */
+@media (min-width:1200px) {
+  .main-grid:not(.no-party) {
+    grid-template-columns: minmax(350px,1fr) minmax(0,2fr);
+    gap: 14px;
+    height: auto;
+    min-height: 0;
+    max-height: none;
+    overflow: visible;
+    align-items: start;
+  }
+  .main-grid:not(.no-party)>.library-panel {
+    height: auto;
+    min-height: 0;
+    max-height: calc(100dvh - 165px);
+  }
+  .main-grid:not(.no-party)>.right-column {
+    display: grid;
+    grid-template-columns: repeat(2,minmax(0,1fr));
+    grid-template-rows: minmax(0,1fr);
+    min-height: 500px;
+    height: calc(100dvh - 168px);
+    max-height: 900px;
+    gap: 14px;
+  }
+  .main-grid:not(.no-party)>.right-column>.panel {
+    width: 100%; height: 100%; min-height: 0;
+    overflow: hidden;
+  }
+  .main-grid:not(.no-party) .roster {
+    overflow-y: auto; flex: 0 1 auto;
+    max-height: calc(100dvh - 365px);
+    min-height: 0;
+  }
+  .main-grid:not(.no-party) .boss-scroll-wrap {overflow-y:auto; min-height:0}
+  .main-grid:not(.no-party) .boss-tiles {
+    max-height: none; overflow: visible;
+    grid-template-columns: repeat(3,minmax(0,1fr));
+  }
+  .main-grid:not(.no-party) .party-toolbar {gap: 10px}
+  .main-grid:not(.no-party) .party-slots {min-height:0; overflow-y:auto}
+}
+/* Natural library height: avoid a large white rectangle below a short roster. */
+.library-panel{align-self:start}
+.owner-characters{padding:8px}
+.character .avatar {
+  width:118px;height:118px;flex:0 0 118px;
+  border-radius:19px;overflow:hidden;
+}
+/* Nexon character images typically contain transparent padding. Enlarge the
+   sprite inside the frame without pretending to improve its source resolution. */
+.character .avatar img {
+  width:100%;height:100%;object-fit:contain;
+  transform:scale(1.65);transform-origin:center center;
+  image-rendering:auto;
+}
+.lookup-inner .avatar{width:104px;height:104px;flex:0 0 104px;overflow:hidden}
+.lookup-inner .avatar img{transform:scale(1.55);object-fit:contain}
+.ratio-character-info .avatar{width:118px;height:118px;flex:0 0 118px;overflow:hidden}
+.ratio-character-info .avatar img{transform:scale(1.6);object-fit:contain}
+.slot .avatar{width:60px;height:60px;flex:0 0 60px;overflow:hidden}
+.slot .avatar img{transform:scale(1.5);object-fit:contain}
+.char-stats{margin-top:8px}
+.stat-chip.stat-power{border-radius:12px;padding:6px 10px}
+.stat-chip.stat-power b{font-size:15px}
+.character-top{padding:10px 12px;gap:14px}
+.boss-cover{max-width:none}
+.party-toolbar{display:grid;grid-template-columns:minmax(0,1fr) 102px;gap:9px}
+.party-switcher-wrap{position:relative;min-width:0}
+.field-caption{display:block;color:#8b95a1;font-size:11px;font-weight:800;margin-bottom:7px}
+.party-switcher{position:relative;min-width:0}
+.party-switcher>summary {
+  min-height:39px; border:1px solid #e1e7ef;background:#fff;
+  display:flex;align-items:center;gap:7px;border-radius:12px;
+  padding:0 11px;cursor:pointer;list-style:none;
+}
+.party-switcher>summary::-webkit-details-marker{display:none}
+.party-switcher-label{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:#25344a;font-size:13px;font-weight:800}
+.party-switcher-chevron{color:#71839a;font-size:20px;line-height:1;transition:transform .18s}
+.party-switcher[open] .party-switcher-chevron{transform:rotate(180deg)}
+.party-switcher>summary:focus-visible{outline:3px solid #b6d3ff;outline-offset:2px}
+.party-switcher-list {
+  position:absolute;z-index:30;top:calc(100% + 5px);left:0;right:0;
+  max-height:240px;overflow:auto;background:white;border:1px solid #e1e7ef;
+  box-shadow:0 12px 32px #21324d20;border-radius:14px;padding:6px;
+}
+.party-choice{display:flex;align-items:center;gap:7px;width:100%;min-height:41px;background:none;border:0;border-radius:9px;color:#354157;padding:8px 10px;text-align:left}
+.party-choice:hover{background:#f6f8fc}
+.party-choice.active{background:#eef5ff;color:#2478eb;font-weight:800}
+.party-choice-text{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex:1;font-size:12px}
+.party-choice small{flex:0 0 auto;font-size:10px;color:#8b95a1}
+.party-check{font-size:14px;color:#3182f6}
+/* Scrollbars remain visible inside the boss panel. */
+.boss-scroll-wrap{scrollbar-width:thin;scrollbar-color:#abbad0 #f2f5fa}
+.boss-scroll-wrap::-webkit-scrollbar{width:10px}
+.boss-scroll-wrap::-webkit-scrollbar-thumb{background:#abbad0;border:2px solid #f2f5fa;border-radius:20px}
+.boss-scroll-wrap::-webkit-scrollbar-track{background:#f2f5fa}
+@media (max-width:1199px) {
+  .main-grid:not(.no-party) {height:auto;display:block}
+  .right-column{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+  .party-panel,.estimate-panel{min-width:0}
+  .boss-scroll-wrap{max-height:470px;overflow-y:auto}
+}
+@media (max-width:800px){
+  .right-column{display:flex;flex-direction:column}
+  .character .avatar{width:106px;height:106px;flex:0 0 106px}
+  .character .avatar img{transform:scale(1.55)}
+  .boss-scroll-wrap{max-height:390px;overflow-y:auto}
+}
+@media (max-width:450px){
+  .character .avatar{width:96px;height:96px;flex:0 0 96px}
+  .character .avatar img{transform:scale(1.5)}
+  .character-top{gap:9px}
+  .slot .avatar{width:50px;height:50px;flex-basis:50px}
+}
+/* Keep the party panel content-height while the boss list has its own scroll. */
+@media (min-width:1200px) {
+  .main-grid:not(.no-party)>.right-column {
+    height:auto;max-height:none;min-height:0;
+    grid-template-rows:auto;align-items:start;
+  }
+  .main-grid:not(.no-party)>.right-column>.party-panel {
+    height:auto;min-height:0;max-height:calc(100dvh - 160px);
+  }
+  .main-grid:not(.no-party)>.right-column>.estimate-panel {
+    height:calc(100dvh - 168px);min-height:520px;max-height:900px;
+  }
+}
+/* Overlay the real character image on its placeholder. The old two-row grid
+   could unintentionally shrink the image inside a large avatar container. */
+.avatar {position:relative;display:block;overflow:hidden}
+.avatar .placeholder {position:absolute;inset:0;display:grid;place-items:center;width:100%;height:100%}
+.avatar img {position:absolute;inset:0;display:block;width:100%;height:100%;object-fit:contain}
+.avatar:has(img) .placeholder {visibility:hidden}
